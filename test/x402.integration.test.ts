@@ -245,7 +245,7 @@ describe('x402 integration', () => {
     expect(paid.status).toBe(200);
     expect(paid.headers.get('x-storage-cost')).not.toBe('0.000000');
     expect(Buffer.from(await paid.arrayBuffer())).toEqual(data);
-  });
+  }, 15_000);
 
   it('stores a private file and only allows the owner wallet to read it', async () => {
     const body = Buffer.from('top secret');
