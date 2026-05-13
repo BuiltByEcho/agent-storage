@@ -63,7 +63,7 @@ export function createApp() {
   app.get('/', (_req, res) => {
     res.json({
       service: 'Vaultline — Dropbox for Agents',
-      version: '0.1.0',
+      version: '0.1.1',
       docs: '/v1/health',
       endpoints: {
         upload: 'PUT /v1/files/{path}',

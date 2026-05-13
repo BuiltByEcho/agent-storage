@@ -295,7 +295,7 @@ router.get('/v1/usage', async (_req, res) => {
 });
 
 router.get('/v1/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'vaultline', version: '0.1.0' });
+  res.json({ status: 'ok', service: 'vaultline', version: '0.1.1' });
 });
 
 async function enforcePrivateUploadAuth(req: any, res: any, next: () => void) {
