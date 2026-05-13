@@ -40,14 +40,14 @@ export const R2_CONFIG = {
   accountId: process.env.R2_ACCOUNT_ID ?? '',
   accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
-  bucketName: process.env.R2_BUCKET_NAME ?? 'agent-storage',
+  bucketName: process.env.R2_BUCKET_NAME ?? 'vaultline',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 } as const;
 
 export const B2_CONFIG = {
   applicationKeyId: process.env.B2_APPLICATION_KEY_ID ?? '',
   applicationKey: process.env.B2_APPLICATION_KEY ?? '',
-  bucketName: process.env.B2_BUCKET_NAME ?? 'agent-storage',
+  bucketName: process.env.B2_BUCKET_NAME ?? 'vaultline',
 } as const;
 
 export const SERVER_CONFIG = {

@@ -6,7 +6,7 @@ It is intentionally focused on structure, narrative, and section goals — not i
 ## Page goal
 
 A visitor should understand three things within a few seconds:
-1. what AgentStorage is
+1. what Vaultline is
 2. why it is different from normal storage APIs
 3. why x402-native storage matters for agent workflows
 
@@ -68,7 +68,7 @@ Suggested headline:
 **Goal:** explain the deeper idea, not just the features.
 
 Key points:
-- AgentStorage treats payment as the access primitive
+- Vaultline treats payment as the access primitive
 - x402 lets a route quote price and settle inline
 - this makes storage machine-buyable
 

@@ -1,5 +1,5 @@
 {
-  "name": "@builtbyecho/agent-storage",
+  "name": "@builtbyecho/vaultline",
   "version": "0.1.0",
   "description": "Vaultline \u2014 x402-native file storage for autonomous agents",
   "main": "dist/index.js",
@@ -14,11 +14,11 @@
     "check:x402:facilitator": "tsx scripts-x402-facilitator-check.ts",
     "check:x402:paid": "tsx scripts-x402-paid-local.ts",
     "check:x402:smoke": "tsx scripts-x402-smoke.ts",
-    "docker:build": "docker build -t agent-storage ."
+    "docker:build": "docker build -t vaultline ."
   },
   "keywords": [
     "x402",
-    "agent-storage",
+    "vaultline",
     "dropbox-for-agents",
     "usdc",
     "base"
@@ -51,10 +51,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BuiltByEcho/agent-storage.git"
+    "url": "git+https://github.com/BuiltByEcho/vaultline.git"
   },
   "homepage": "https://builtbyecho.xyz/#vaultline",
   "bugs": {
-    "url": "https://github.com/BuiltByEcho/agent-storage/issues"
+    "url": "https://github.com/BuiltByEcho/vaultline/issues"
   }
 }

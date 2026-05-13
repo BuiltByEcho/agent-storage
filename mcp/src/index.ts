@@ -42,7 +42,7 @@ async function storageRequest(method: string, path: string, body?: Buffer | obje
 
 const server = new Server(
   {
-    name: 'agent-storage',
+    name: 'vaultline',
     version: '0.1.0',
   },
   {
@@ -202,7 +202,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('AgentStorage MCP server running on stdio');
+  console.error('Vaultline MCP server running on stdio');
 }
 
 main().catch(console.error);

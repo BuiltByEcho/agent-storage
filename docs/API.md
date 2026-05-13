@@ -1,4 +1,4 @@
-# AgentStorage API
+# Vaultline API
 
 Base URL examples:
 - local: `http://localhost:3001`
@@ -6,7 +6,7 @@ Base URL examples:
 
 ## Payment model
 
-AgentStorage uses x402 v2 on Base mainnet for paid routes.
+Vaultline uses x402 v2 on Base mainnet for paid routes.
 
 When a request requires payment:
 1. client sends request normally
@@ -172,7 +172,7 @@ Private storage uses a wallet-signed message for ownership/access checks.
 Message format:
 
 ```text
-AgentStorage auth
+Vaultline auth
 method:PUT
 path:private.txt
 wallet:0xYourWallet
@@ -189,7 +189,7 @@ The server verifies:
 
 For paid routes, the canonical machine-readable source is the `payment-required` header.
 
-AgentStorage may also include a JSON body with convenience fields like:
+Vaultline may also include a JSON body with convenience fields like:
 - `error`
 - `operation`
 - `amount`

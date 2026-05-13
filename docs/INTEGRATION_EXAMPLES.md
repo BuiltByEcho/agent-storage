@@ -1,6 +1,6 @@
-# AgentStorage Integration Examples
+# Vaultline Integration Examples
 
-This page shows how an agent client can interact with AgentStorage routes that use x402 v2.
+This page shows how an agent client can interact with Vaultline routes that use x402 v2.
 
 Examples below assume:
 - Base mainnet payments
@@ -77,7 +77,7 @@ import json
 import os
 import requests
 
-BASE_URL = os.getenv("AGENT_STORAGE_URL", "https://agent-storage.example.com")
+BASE_URL = os.getenv("AGENT_STORAGE_URL", "https://vaultline.example.com")
 PRIVATE_KEY = os.environ["X402_PAYER_PRIVATE_KEY"]
 
 
@@ -127,7 +127,7 @@ This is the default tier unless you explicitly request `private`.
 const fileBody = Buffer.from('hello from an agent\n');
 
 const response = await payAndRetry(
-  'https://agent-storage.example.com/v1/files/workspace/demo.txt',
+  'https://vaultline.example.com/v1/files/workspace/demo.txt',
   {
     method: 'PUT',
     body: fileBody,
@@ -179,7 +179,7 @@ const authSignature = await account.signMessage({ message });
 const fileBody = Buffer.from('private agent notes\n');
 
 const response = await payAndRetry(
-  'https://agent-storage.example.com/v1/files/workspace/secret.txt',
+  'https://vaultline.example.com/v1/files/workspace/secret.txt',
   {
     method: 'PUT',
     body: fileBody,
@@ -209,7 +209,7 @@ Expected behavior:
 
 ```ts
 const response = await fetch(
-  'https://agent-storage.example.com/v1/files/workspace/demo.txt'
+  'https://vaultline.example.com/v1/files/workspace/demo.txt'
 );
 
 console.log(response.status);
@@ -236,7 +236,7 @@ For files smaller than `FREE_READ_MAX_BYTES`, this should succeed directly witho
 
 ```ts
 const response = await payAndRetry(
-  'https://agent-storage.example.com/v1/files/artifacts/model-output.bin'
+  'https://vaultline.example.com/v1/files/artifacts/model-output.bin'
 );
 
 console.log(response.status);
@@ -272,7 +272,7 @@ Expected behavior:
 
 ```ts
 const head = await fetch(
-  'https://agent-storage.example.com/v1/files/artifacts/model-output.bin',
+  'https://vaultline.example.com/v1/files/artifacts/model-output.bin',
   { method: 'HEAD' }
 );
 
@@ -304,7 +304,7 @@ This is the simplest route to test that a client wallet can complete the x402 fl
 
 ```ts
 const response = await payAndRetry(
-  'https://agent-storage.example.com/v1/test/paid-ping'
+  'https://vaultline.example.com/v1/test/paid-ping'
 );
 
 console.log(response.status);

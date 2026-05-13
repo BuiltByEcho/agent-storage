@@ -1,10 +1,10 @@
 {
-  "name": "@builtbyecho/agent-storage-mcp",
+  "name": "@builtbyecho/vaultline-mcp",
   "version": "0.1.0",
-  "description": "MCP server for AgentStorage — file storage for agents via x402",
+  "description": "MCP server for Vaultline — file storage for agents via x402",
   "main": "dist/index.js",
   "bin": {
-    "agent-storage-mcp": "dist/index.js"
+    "vaultline-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

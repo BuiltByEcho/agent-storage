@@ -1,4 +1,4 @@
-# AgentStorage Architecture
+# Vaultline Architecture
 
 ## High-level flow
 
@@ -58,7 +58,7 @@ Holds pricing logic for:
 
 ## Payment architecture
 
-AgentStorage currently uses:
+Vaultline currently uses:
 - x402 v2
 - exact scheme
 - Base mainnet `eip155:8453`

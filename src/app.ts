@@ -44,7 +44,7 @@ export function createApp() {
               network: X402_MAINNET_NETWORK,
               payTo: testPayTo,
             },
-            description: 'AgentStorage paid ping test',
+            description: 'Vaultline paid ping test',
             mimeType: 'application/json',
           },
         },
@@ -54,14 +54,14 @@ export function createApp() {
   }
 
   app.get('/v1/test/paid-ping', (_req, res) => {
-    res.json({ ok: true, paid: true, service: 'agent-storage', ts: new Date().toISOString() });
+    res.json({ ok: true, paid: true, service: 'vaultline', ts: new Date().toISOString() });
   });
 
   app.use(filesRouter);
 
   app.get('/', (_req, res) => {
     res.json({
-      service: 'AgentStorage — Dropbox for Agents',
+      service: 'Vaultline — Dropbox for Agents',
       version: '0.1.0',
       docs: '/v1/health',
       endpoints: {

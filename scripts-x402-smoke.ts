@@ -21,7 +21,7 @@ const httpClient = new x402HTTPClient(client);
 async function main() {
   const fileKey = `smoke/${Date.now()}-demo.txt`;
   const fileUrl = `${baseUrl}/v1/files/${fileKey}`;
-  const body = Buffer.from(`agent-storage smoke test ${new Date().toISOString()}\n`);
+  const body = Buffer.from(`vaultline smoke test ${new Date().toISOString()}\n`);
 
   console.log(`payer: ${account.address}`);
   console.log(`baseUrl: ${baseUrl}`);

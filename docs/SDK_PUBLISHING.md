@@ -1,6 +1,6 @@
-# AgentStorage SDK Publishing
+# Vaultline SDK Publishing
 
-This is the publishing checklist for `@builtbyecho/agent-storage-sdk`.
+This is the publishing checklist for `@builtbyecho/vaultline-sdk`.
 
 ## Package location
 
@@ -10,7 +10,7 @@ This is the publishing checklist for `@builtbyecho/agent-storage-sdk`.
 
 Current checked state:
 - `npm whoami` -> `builtbyecho`
-- `npm view @builtbyecho/agent-storage-sdk version` -> `404 Not Found`
+- `npm view @builtbyecho/vaultline-sdk version` -> `404 Not Found`
 
 That means the package name appears available for a first publish under the current logged-in npm account.
 
@@ -47,12 +47,12 @@ npm publish --access public
 ## Exact first-release flow
 
 ```bash
-cd projects/agent-storage/sdk
+cd projects/vaultline/sdk
 npm whoami
 npm run prepublishOnly
 npm pack --dry-run
 npm publish --access public
-npm view @builtbyecho/agent-storage-sdk version
+npm view @builtbyecho/vaultline-sdk version
 ```
 
 ## Current publish posture

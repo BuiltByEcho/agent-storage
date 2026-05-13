@@ -1,6 +1,6 @@
 # Security Policy
 
-Vaultline / AgentStorage is an x402-native storage service. Treat it as payment and storage infrastructure, not a demo toy.
+Vaultline / Vaultline is an x402-native storage service. Treat it as payment and storage infrastructure, not a demo toy.
 
 ## Supported surface
 
@@ -8,7 +8,7 @@ The currently supported public surfaces are:
 
 - `open` storage tier
 - `private` wallet-gated storage tier
-- TypeScript SDK package: `@builtbyecho/agent-storage-sdk`
+- TypeScript SDK package: `@builtbyecho/vaultline-sdk`
 
 The `encrypted` tier is planned, but not live. Do not rely on it for confidentiality.
 

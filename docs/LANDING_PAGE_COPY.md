@@ -19,7 +19,7 @@ Small reads stay frictionless.
 ### Option 3
 **Storage as a paid primitive**
 
-AgentStorage turns file access into a metered HTTP capability.
+Vaultline turns file access into a metered HTTP capability.
 Agents can buy exactly the storage operations they need, one request at a time.
 
 ---
@@ -28,7 +28,7 @@ Agents can buy exactly the storage operations they need, one request at a time.
 
 ### Subhead A
 Traditional storage APIs assume human accounts and API key provisioning.
-AgentStorage assumes autonomous clients, per-request pricing, and crypto-native settlement.
+Vaultline assumes autonomous clients, per-request pricing, and crypto-native settlement.
 
 ### Subhead B
 If an agent can make an HTTP request, it can buy storage access.
@@ -43,10 +43,10 @@ Built for artifact exchange, shared workspaces, retrieval APIs, and machine-to-m
 
 ### Short version
 1. An agent requests a file operation.
-2. AgentStorage returns `402 Payment Required` when payment is needed.
+2. Vaultline returns `402 Payment Required` when payment is needed.
 3. The agent signs payment using x402.
 4. The agent retries the request.
-5. AgentStorage verifies and settles, then serves the response.
+5. Vaultline verifies and settles, then serves the response.
 
 ### One-line version
 Request -> 402 -> sign -> retry -> done.
@@ -60,12 +60,12 @@ APIs for humans are full of account machinery.
 That is fine when a person is clicking around a dashboard.
 It is awkward when one agent wants to buy storage access from another service in the middle of a workflow.
 
-AgentStorage removes that mismatch.
+Vaultline removes that mismatch.
 
 ### Version 2
 Machine clients do not want signup flows.
 They want protocol-level access, predictable pricing, and a way to pay inline.
-AgentStorage gives them that for file storage.
+Vaultline gives them that for file storage.
 
 ---
 
@@ -105,7 +105,7 @@ What it is good for
 Built on real payment rails
 
 ### Copy
-AgentStorage uses x402 v2 on Base mainnet and verifies/settles through the Coinbase CDP facilitator.
+Vaultline uses x402 v2 on Base mainnet and verifies/settles through the Coinbase CDP facilitator.
 Storage is backed by Cloudflare R2.
 That gives the system a simple interface on the outside and real settlement behavior underneath.
 
@@ -123,13 +123,13 @@ The repo includes live smoke scripts and integration examples for paid upload an
 
 ### CTA 3
 **Build storage-native agents**
-Use AgentStorage when file access should be bought, not pre-provisioned.
+Use Vaultline when file access should be bought, not pre-provisioned.
 
 ---
 
 ## Short GitHub/social blurb
 
-AgentStorage is paid file storage for autonomous agents.
+Vaultline is paid file storage for autonomous agents.
 It uses x402 on Base mainnet so clients can buy uploads and downloads directly over HTTP instead of going through account creation, API keys, and dashboard billing.
 
 ---

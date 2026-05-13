@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { privateKeyToAccount } from 'viem/accounts';
-import { AgentStorageClient } from '../src/client.js';
-import { AgentStorageError } from '../src/errors.js';
+import { VaultlineClient } from '../src/client.js';
+import { VaultlineError } from '../src/errors.js';
 
 const privateKey = '0x39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad' as const;
 const account = privateKeyToAccount(privateKey);
@@ -16,7 +16,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
   });
 }
 
-describe('AgentStorageClient', () => {
+describe('VaultlineClient', () => {
   it('uploads open files and retries after 402', async () => {
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -68,7 +68,7 @@ describe('AgentStorageClient', () => {
         })
       );
 
-    const client = new AgentStorageClient({ baseUrl: 'https://agent-storage.example.com', account, fetch: fetchMock });
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
     const result = await client.upload('demo.txt', 'hello', { contentType: 'text/plain' });
 
     expect(result.data.ok).toBe(true);
@@ -86,7 +86,7 @@ describe('AgentStorageClient', () => {
       })
     );
 
-    const client = new AgentStorageClient({ baseUrl: 'https://agent-storage.example.com', account, fetch: fetchMock });
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
     await client.upload('secret.txt', 'secret', { tier: 'private', contentType: 'text/plain' });
 
     const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
@@ -100,7 +100,7 @@ describe('AgentStorageClient', () => {
       jsonResponse({ files: [], directories: [], prefix: '', truncated: false })
     );
 
-    const client = new AgentStorageClient({ baseUrl: 'https://agent-storage.example.com', account, fetch: fetchMock });
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
     await client.list('', { includePrivate: true });
 
     const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
@@ -112,10 +112,10 @@ describe('AgentStorageClient', () => {
       jsonResponse({ error: 'file not found', key: 'missing.txt' }, { status: 404, statusText: 'Not Found' })
     );
 
-    const client = new AgentStorageClient({ baseUrl: 'https://agent-storage.example.com', account, fetch: fetchMock });
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
 
     await expect(client.downloadText('missing.txt')).rejects.toMatchObject({
-      name: 'AgentStorageError',
+      name: 'VaultlineError',
       status: 404,
       body: { error: 'file not found', key: 'missing.txt' },
     });
@@ -126,8 +126,8 @@ describe('AgentStorageClient', () => {
       jsonResponse({ files: [], directories: [], prefix: '', truncated: false })
     );
 
-    const client = new AgentStorageClient({
-      baseUrl: 'https://agent-storage.example.com',
+    const client = new VaultlineClient({
+      baseUrl: 'https://vaultline.example.com',
       account,
       fetch: fetchMock,
       timeoutMs: 5000,
@@ -137,9 +137,9 @@ describe('AgentStorageClient', () => {
     expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
   });
 
-  it('exports AgentStorageError for instanceof checks', () => {
-    const error = new AgentStorageError('boom', { status: 500 });
-    expect(error).toBeInstanceOf(AgentStorageError);
+  it('exports VaultlineError for instanceof checks', () => {
+    const error = new VaultlineError('boom', { status: 500 });
+    expect(error).toBeInstanceOf(VaultlineError);
     expect(error.status).toBe(500);
   });
 });

@@ -1,6 +1,6 @@
-# AgentStorage Overview
+# Vaultline Overview
 
-AgentStorage is paid file storage for autonomous agents.
+Vaultline is paid file storage for autonomous agents.
 
 It gives an agent a simple contract:
 - make a normal HTTP request
@@ -29,7 +29,7 @@ Agents want:
 - composable HTTP interfaces
 - cryptographic payment and settlement
 
-AgentStorage is built around that shape.
+Vaultline is built around that shape.
 
 ## What it does today
 
@@ -54,7 +54,7 @@ That means agents can treat storage as a metered primitive rather than a subscri
 
 ## Current positioning
 
-AgentStorage is best thought of as:
+Vaultline is best thought of as:
 - a paid storage API
 - a reference implementation for x402-gated file operations
 - a building block for agent sync, shared workspaces, artifact exchange, and paid retrieval
@@ -74,4 +74,4 @@ Best-fit users right now:
 
 ## One-line pitch
 
-AgentStorage is persistent file storage for agents, sold one request at a time over x402, with a tier ladder from open to private and eventually encrypted.
+Vaultline is persistent file storage for agents, sold one request at a time over x402, with a tier ladder from open to private and eventually encrypted.

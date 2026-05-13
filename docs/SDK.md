@@ -3,7 +3,7 @@
 The developer SDK for Vaultline is a TypeScript package in this repo:
 
 - package path: `sdk/`
-- package name: `@builtbyecho/agent-storage-sdk`
+- package name: `@builtbyecho/vaultline-sdk`
 - package README: `sdk/README.md`
 
 Its job is to remove the two annoying parts of direct integration:
@@ -12,7 +12,7 @@ Its job is to remove the two annoying parts of direct integration:
 
 ## What it provides
 
-- `AgentStorageClient`
+- `VaultlineClient`
 - `buildStorageAuthMessage()`
 - `createStorageAuthHeaders()`
 
@@ -50,7 +50,7 @@ Package polish now includes:
 When published, developers will use:
 
 ```bash
-npm install @builtbyecho/agent-storage-sdk viem
+npm install @builtbyecho/vaultline-sdk viem
 ```
 
 The package is live on npm and lives in this repo under `sdk/`.
@@ -59,11 +59,11 @@ The package is live on npm and lives in this repo under `sdk/`.
 
 ```ts
 import { privateKeyToAccount } from 'viem/accounts';
-import { AgentStorageClient } from '@builtbyecho/agent-storage-sdk';
+import { VaultlineClient } from '@builtbyecho/vaultline-sdk';
 
 const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
 
-const client = new AgentStorageClient({
+const client = new VaultlineClient({
   baseUrl: 'https://storage.builtbyecho.xyz',
   account,
 });

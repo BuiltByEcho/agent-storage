@@ -1,6 +1,6 @@
 {
-  "name": "@builtbyecho/agent-storage-sdk",
-  "version": "0.1.2",
+  "name": "@builtbyecho/vaultline-sdk",
+  "version": "0.1.0",
   "description": "TypeScript SDK for Vaultline \u2014 x402-native file storage for agents with typed errors and request timeouts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,7 +23,6 @@
   },
   "keywords": [
     "vaultline",
-    "agent-storage",
     "x402",
     "sdk",
     "base",
@@ -36,10 +35,10 @@
   "homepage": "https://builtbyecho.xyz/#vaultline",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BuiltByEcho/agent-storage.git"
+    "url": "git+https://github.com/BuiltByEcho/vaultline.git"
   },
   "bugs": {
-    "url": "https://github.com/BuiltByEcho/agent-storage/issues"
+    "url": "https://github.com/BuiltByEcho/vaultline/issues"
   },
   "engines": {
     "node": ">=20"

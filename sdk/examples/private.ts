@@ -1,10 +1,10 @@
 import { privateKeyToAccount } from 'viem/accounts';
-import { AgentStorageClient } from '../dist/index.js';
+import { VaultlineClient } from '../dist/index.js';
 
 const privateKey = process.env.X402_PAYER_PRIVATE_KEY as `0x${string}` | undefined;
 if (!privateKey) throw new Error('Missing X402_PAYER_PRIVATE_KEY');
 
-const client = new AgentStorageClient({
+const client = new VaultlineClient({
   baseUrl: process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001',
   account: privateKeyToAccount(privateKey),
 });

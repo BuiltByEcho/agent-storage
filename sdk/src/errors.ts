@@ -1,4 +1,4 @@
-export type AgentStorageErrorOptions = {
+export type VaultlineErrorOptions = {
   status: number;
   statusText?: string;
   url?: string;
@@ -7,8 +7,8 @@ export type AgentStorageErrorOptions = {
   response?: Response;
 };
 
-export class AgentStorageError extends Error {
-  readonly name = 'AgentStorageError';
+export class VaultlineError extends Error {
+  readonly name = 'VaultlineError';
   readonly status: number;
   readonly statusText?: string;
   readonly url?: string;
@@ -16,7 +16,7 @@ export class AgentStorageError extends Error {
   readonly body?: unknown;
   readonly response?: Response;
 
-  constructor(message: string, options: AgentStorageErrorOptions) {
+  constructor(message: string, options: VaultlineErrorOptions) {
     super(message);
     this.status = options.status;
     this.statusText = options.statusText;
@@ -59,8 +59,8 @@ export async function assertOkResponse(response: Response, input: { url?: string
       ? String((body as { error?: unknown }).error)
       : response.statusText || 'request failed';
 
-  throw new AgentStorageError(
-    `AgentStorage ${input.method ?? 'request'} failed with ${response.status}${detail ? `: ${detail}` : ''}`,
+  throw new VaultlineError(
+    `Vaultline ${input.method ?? 'request'} failed with ${response.status}${detail ? `: ${detail}` : ''}`,
     {
       status: response.status,
       statusText: response.statusText,

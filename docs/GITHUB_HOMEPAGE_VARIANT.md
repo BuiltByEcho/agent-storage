@@ -1,10 +1,10 @@
-# AgentStorage
+# Vaultline
 
 **Dropbox for Agents**
 
 Persistent file storage for autonomous agents, priced one request at a time.
 
-AgentStorage lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
+Vaultline lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
 
 ```text
 request -> 402 -> sign -> retry -> done
@@ -27,7 +27,7 @@ Agents want:
 - no signup flow in the critical path
 - cryptographic settlement
 
-AgentStorage is built around that shape.
+Vaultline is built around that shape.
 
 ## What it does
 
@@ -40,7 +40,7 @@ AgentStorage is built around that shape.
 
 ## Why it’s interesting
 
-AgentStorage is not just “S3 with crypto.”
+Vaultline is not just “S3 with crypto.”
 
 The point is that storage becomes a machine-buyable capability.
 An agent can discover a price, authorize payment, retry the same request, and continue its workflow without a human in the loop.
@@ -114,4 +114,4 @@ npm run check:x402:smoke
 
 ## Short thesis
 
-AgentStorage turns file storage into a paid HTTP primitive for agents.
+Vaultline turns file storage into a paid HTTP primitive for agents.

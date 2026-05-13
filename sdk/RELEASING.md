@@ -1,10 +1,10 @@
-# Releasing @builtbyecho/agent-storage-sdk
+# Releasing @builtbyecho/vaultline-sdk
 
 ## 1. Confirm package name and auth
 
 ```bash
 npm whoami
-npm view @builtbyecho/agent-storage-sdk version
+npm view @builtbyecho/vaultline-sdk version
 ```
 
 Expected today:
@@ -30,16 +30,16 @@ npm publish --access public
 ## 4. Verify after publish
 
 ```bash
-npm view @builtbyecho/agent-storage-sdk version
-npm view @builtbyecho/agent-storage-sdk dist-tags --json
+npm view @builtbyecho/vaultline-sdk version
+npm view @builtbyecho/vaultline-sdk dist-tags --json
 ```
 
 ## 5. Install smoke test
 
 ```bash
-mkdir -p /tmp/agent-storage-sdk-smoke && cd /tmp/agent-storage-sdk-smoke
+mkdir -p /tmp/vaultline-sdk-smoke && cd /tmp/vaultline-sdk-smoke
 npm init -y
-npm install @builtbyecho/agent-storage-sdk viem
+npm install @builtbyecho/vaultline-sdk viem
 ```
 
 ## Current release target

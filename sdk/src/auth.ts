@@ -8,7 +8,7 @@ export function buildStorageAuthMessage(input: {
   timestamp: number;
 }) {
   return [
-    'AgentStorage auth',
+    'Vaultline auth',
     `method:${input.method.toUpperCase()}`,
     `path:${normalizeStoragePath(input.path)}`,
     `wallet:${getAddress(input.wallet)}`,

@@ -36,7 +36,7 @@ const uploadPaymentMiddleware = testPayTo
             network: X402_MAINNET_NETWORK,
             payTo: testPayTo,
           },
-          description: 'Upload a file to AgentStorage',
+          description: 'Upload a file to Vaultline',
           mimeType: 'application/json',
           unpaidResponseBody: async ({ adapter, path }) => {
             const sizeBytes = getRequestSizeBytes(adapter);
@@ -74,7 +74,7 @@ const downloadPaymentMiddleware = testPayTo
             network: X402_MAINNET_NETWORK,
             payTo: testPayTo,
           },
-          description: 'Download a file from AgentStorage',
+          description: 'Download a file from Vaultline',
           mimeType: 'application/octet-stream',
           unpaidResponseBody: async ({ path }) => {
             const { key, size, amount } = await getDownloadPricingFromPath(path);
@@ -236,7 +236,7 @@ router.get('/v1/usage', async (_req, res) => {
 });
 
 router.get('/v1/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'agent-storage', version: '0.1.0' });
+  res.json({ status: 'ok', service: 'vaultline', version: '0.1.0' });
 });
 
 async function enforcePrivateUploadAuth(req: any, res: any, next: () => void) {

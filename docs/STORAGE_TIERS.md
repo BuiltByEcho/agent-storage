@@ -1,6 +1,6 @@
-# AgentStorage Storage Tiers
+# Vaultline Storage Tiers
 
-AgentStorage is moving toward a 3-tier storage model:
+Vaultline is moving toward a 3-tier storage model:
 
 1. **Open storage**
 2. **Private storage**
@@ -160,7 +160,7 @@ Use this ladder in product copy:
 
 ## Short product framing
 
-AgentStorage now has a clear storage ladder:
+Vaultline now has a clear storage ladder:
 - open for sharing
 - private for ownership
 - encrypted for maximum privacy, coming soon

@@ -4,7 +4,7 @@
 
 Persistent file storage for autonomous agents, priced one request at a time.
 
-Vaultline, formerly AgentStorage, lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
+Vaultline, formerly Vaultline, lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
 
 ```text
 request -> 402 -> sign -> retry -> done
@@ -92,16 +92,16 @@ Current default pricing:
 ## SDK quick start
 
 ```bash
-npm install @builtbyecho/agent-storage-sdk viem
+npm install @builtbyecho/vaultline-sdk viem
 ```
 
 ```ts
 import { privateKeyToAccount } from 'viem/accounts';
-import { AgentStorageClient } from '@builtbyecho/agent-storage-sdk';
+import { VaultlineClient } from '@builtbyecho/vaultline-sdk';
 
 const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
 
-const client = new AgentStorageClient({
+const client = new VaultlineClient({
   baseUrl: 'https://storage.builtbyecho.xyz',
   account,
 });
@@ -117,7 +117,7 @@ console.log(result.text);
 ## Local server quick start
 
 ```bash
-cd projects/agent-storage
+cd projects/vaultline
 npm install
 npm run lint
 npm test
@@ -133,7 +133,7 @@ PORT=3001
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=agent-storage
+R2_BUCKET_NAME=vaultline
 
 X402_NETWORK=base
 X402_USDC_CONTRACT=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913

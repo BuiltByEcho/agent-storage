@@ -1,4 +1,4 @@
-# AgentStorage Operations
+# Vaultline Operations
 
 ## Environment
 
@@ -11,7 +11,7 @@ NODE_ENV=production
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=agent-storage
+R2_BUCKET_NAME=vaultline
 
 X402_NETWORK=base
 X402_USDC_CONTRACT=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913

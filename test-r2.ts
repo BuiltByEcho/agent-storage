@@ -14,13 +14,13 @@ async function test() {
   console.log('Testing R2 connection...');
   
   // 1. List bucket (should be empty)
-  const list = await client.send(new ListObjectsV2Command({ Bucket: 'agent-storage' }));
+  const list = await client.send(new ListObjectsV2Command({ Bucket: 'vaultline' }));
   console.log('✅ Connection works! Bucket contents:', list.Contents?.length ?? 0, 'objects');
   
   // 2. Write a test file
-  const testData = Buffer.from('Hello from AgentStorage! 🚀');
+  const testData = Buffer.from('Hello from Vaultline! 🚀');
   await client.send(new PutObjectCommand({
-    Bucket: 'agent-storage',
+    Bucket: 'vaultline',
     Key: '_test/hello.txt',
     Body: testData,
     ContentType: 'text/plain',
@@ -29,7 +29,7 @@ async function test() {
   
   // 3. Read it back
   const get = await client.send(new GetObjectCommand({
-    Bucket: 'agent-storage',
+    Bucket: 'vaultline',
     Key: '_test/hello.txt',
   }));
   const body = await get.Body?.transformToByteArray();
@@ -38,12 +38,12 @@ async function test() {
   
   // 4. Delete it
   await client.send(new DeleteObjectCommand({
-    Bucket: 'agent-storage',
+    Bucket: 'vaultline',
     Key: '_test/hello.txt',
   }));
   console.log('✅ Delete works! Cleaned up test file');
   
-  console.log('\n🟢 All R2 operations successful. AgentStorage is ready to go!');
+  console.log('\n🟢 All R2 operations successful. Vaultline is ready to go!');
 }
 
 test().catch(err => {

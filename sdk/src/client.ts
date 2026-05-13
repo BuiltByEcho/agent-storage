@@ -5,7 +5,7 @@ import type { PrivateKeyAccount } from 'viem/accounts';
 import { createStorageAuthHeaders, normalizeStoragePath } from './auth.js';
 import { assertOkResponse } from './errors.js';
 import type {
-  AgentStorageClientOptions,
+  VaultlineClientOptions,
   DeleteOptions,
   DeleteResponse,
   DownloadOptions,
@@ -17,7 +17,7 @@ import type {
   UploadResponse,
 } from './types.js';
 
-export class AgentStorageClient {
+export class VaultlineClient {
   readonly baseUrl: string;
   readonly account: PrivateKeyAccount;
   readonly fetchImpl: typeof fetch;
@@ -25,7 +25,7 @@ export class AgentStorageClient {
   readonly httpClient: x402HTTPClient;
   readonly timeoutMs: number;
 
-  constructor(options: AgentStorageClientOptions) {
+  constructor(options: VaultlineClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.account = options.account;
     this.fetchImpl = options.fetch ?? fetch;

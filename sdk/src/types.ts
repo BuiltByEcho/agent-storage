@@ -2,7 +2,7 @@ import type { PrivateKeyAccount } from 'viem/accounts';
 
 export type StorageTier = 'open' | 'private';
 
-export type AgentStorageClientOptions = {
+export type VaultlineClientOptions = {
   baseUrl: string;
   account: PrivateKeyAccount;
   fetch?: typeof fetch;

@@ -1,4 +1,4 @@
-# AgentStorage API Examples
+# Vaultline API Examples
 
 ## Live storage tiers
 
@@ -45,7 +45,7 @@ x-auth-signature: 0x...
 ## Private auth message format
 
 ```text
-AgentStorage auth
+Vaultline auth
 method:PUT
 path:workspace/secret.txt
 wallet:0xYourWallet

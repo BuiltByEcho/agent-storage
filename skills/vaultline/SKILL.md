@@ -1,11 +1,11 @@
 ---
-name: agent-storage
-description: Use when an agent needs to store, retrieve, list, inspect, or delete files through AgentStorage, or when it needs to choose between open and private storage tiers, construct the required wallet-auth headers for private objects, or follow the x402 pay-and-retry flow for uploads and downloads. Also use when explaining that encrypted storage is coming soon but not live.
+name: vaultline
+description: Use when an agent needs to store, retrieve, list, inspect, or delete files through Vaultline, or when it needs to choose between open and private storage tiers, construct the required wallet-auth headers for private objects, or follow the x402 pay-and-retry flow for uploads and downloads. Also use when explaining that encrypted storage is coming soon but not live.
 ---
 
-# Agent Storage
+# Vaultline
 
-Use this skill to work with the AgentStorage API correctly and consistently.
+Use this skill to work with the Vaultline API correctly and consistently.
 
 ## Quick workflow
 

@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'agent-storage',
-      cwd: '/home/dustin/apps/agent-storage',
+      name: 'vaultline',
+      cwd: '/home/dustin/apps/vaultline',
       script: 'dist/index.js',
       instances: 1,
       exec_mode: 'fork',

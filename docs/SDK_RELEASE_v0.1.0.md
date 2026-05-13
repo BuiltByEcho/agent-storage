@@ -1,13 +1,13 @@
-# AgentStorage SDK Release Notes — v0.1.0
+# Vaultline SDK Release Notes — v0.1.0
 
 ## Package
 
-- name: `@builtbyecho/agent-storage-sdk`
+- name: `@builtbyecho/vaultline-sdk`
 - version: `0.1.0`
 
 ## Summary
 
-First public TypeScript SDK release for AgentStorage.
+First public TypeScript SDK release for Vaultline.
 
 This release gives developers a clean client for:
 - x402 pay-and-retry flows
@@ -16,7 +16,7 @@ This release gives developers a clean client for:
 
 ## What’s included
 
-- `AgentStorageClient`
+- `VaultlineClient`
 - `buildStorageAuthMessage()`
 - `createStorageAuthHeaders()`
 
@@ -57,6 +57,6 @@ Developers no longer need to hand-roll:
 Publish as:
 
 ```bash
-cd projects/agent-storage/sdk
+cd projects/vaultline/sdk
 npm publish --access public
 ```

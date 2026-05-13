@@ -1,10 +1,10 @@
-# AgentStorage SDK v0.1.1
+# Vaultline SDK v0.1.1
 
 Small hardening release for agent and CLI consumers.
 
 ## What changed
 
-- Added exported `AgentStorageError` for `instanceof`-safe error handling.
+- Added exported `VaultlineError` for `instanceof`-safe error handling.
 - SDK helper methods now throw typed errors for non-2xx responses after any x402 retry.
 - Error objects include HTTP status, method, URL, response, and parsed JSON/text body.
 - Added default request timeouts with `timeoutMs` client option (`30_000` ms by default, `0` disables).
@@ -13,7 +13,7 @@ Small hardening release for agent and CLI consumers.
 
 ## Why it matters
 
-Agents need to decide whether to retry, fall back, ask a human, or mark a task blocked. Raw failed `Response` objects and JSON parse failures are awkward in autonomous workflows. Typed errors make AgentStorage safer to embed in tools and MCP servers.
+Agents need to decide whether to retry, fall back, ask a human, or mark a task blocked. Raw failed `Response` objects and JSON parse failures are awkward in autonomous workflows. Typed errors make Vaultline safer to embed in tools and MCP servers.
 
 ## Verification
 
