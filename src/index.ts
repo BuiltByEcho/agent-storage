@@ -12,7 +12,7 @@ async function main() {
     console.log(`🚀 AgentStorage running on port ${SERVER_CONFIG.port}`);
     console.log(`   Storage backend: Cloudflare R2`);
     console.log(`   Payment protocol: x402 (USDC on Base)`);
-    console.log(`   Treasury: ${process.env.X402_TREASURY_WALLET ?? 'not configured'}`);
+    console.log(`   Treasury configured: ${process.env.X402_TREASURY_WALLET ? 'yes' : 'no'}`);
   });
 }
 

@@ -411,7 +411,11 @@ function normalizeBodyToBuffer(rawBody: unknown): Buffer {
 }
 
 function getParamPath(value: unknown): string | undefined {
-  return Array.isArray(value) ? value.join('/') : typeof value === 'string' ? value : undefined;
+  const path = Array.isArray(value) ? value.join('/') : typeof value === 'string' ? value : undefined;
+  if (!path || path.length > 1024 || path.includes('\0')) return undefined;
+  const parts = path.split('/');
+  if (path.startsWith('/') || parts.some((part) => part === '..')) return undefined;
+  return path;
 }
 
 function getRequestedStorageTierFromAdapter(adapter: { getHeader(name: string): string | undefined }): 'open' | 'private' {
@@ -440,7 +444,7 @@ async function getDownloadPricingFromPath(path: string) {
   return {
     key,
     size: meta.size,
-    amount: calculatePaymentAmount('read', meta.size),
+    amount: calculatePaymentAmount('read', meta.size, meta.tier),
   };
 }
 

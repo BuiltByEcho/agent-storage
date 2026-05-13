@@ -2,24 +2,28 @@ import express from 'express';
 import cors from 'cors';
 import { paymentMiddleware as paymentMiddlewareV2 } from '@x402/express';
 import filesRouter from './routes/files.js';
-import { X402_CONFIG } from './config.js';
+import { SERVER_CONFIG, X402_CONFIG } from './config.js';
 import { getResourceServer, X402_MAINNET_NETWORK } from './cdpFacilitator.js';
 
 export function createApp() {
   const app = express();
 
-  app.use(cors());
-  app.use(express.json({ limit: '100mb' }));
-  app.use('/v1/files', express.raw({ type: () => true, limit: '100mb' }));
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+
+  app.use(
+    cors({
+      origin: SERVER_CONFIG.corsOrigins.includes('*') ? true : SERVER_CONFIG.corsOrigins,
+    })
+  );
+  app.use(express.json({ limit: SERVER_CONFIG.bodyLimit }));
+  app.use('/v1/files', express.raw({ type: () => true, limit: SERVER_CONFIG.bodyLimit }));
 
   app.use((req, _res, next) => {
     const paymentHeader = req.headers['x-payment'] || req.headers['payment-signature'];
     const hasXPayment = Boolean(paymentHeader);
     if (req.path.startsWith('/v1/test/paid-ping')) {
       console.log(`${new Date().toISOString()} ${req.method} ${req.path} paymentHeader=${hasXPayment ? 'yes' : 'no'}`);
-      if (typeof paymentHeader === 'string') {
-        console.log(`paymentHeaderPrefix=${paymentHeader.slice(0, 80)}`);
-      }
     } else {
       console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
     }

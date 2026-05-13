@@ -48,5 +48,13 @@
   },
   "overrides": {
     "axios": "^1.16.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BuiltByEcho/agent-storage.git"
+  },
+  "homepage": "https://builtbyecho.xyz/#vaultline",
+  "bugs": {
+    "url": "https://github.com/BuiltByEcho/agent-storage/issues"
   }
 }
