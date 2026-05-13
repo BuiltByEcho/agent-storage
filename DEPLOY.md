@@ -16,8 +16,8 @@ Railway is still the easiest first deploy for this service:
 4. Deploy.
 5. Verify `GET /v1/health`.
 6. Run `npm run check:x402:facilitator` in the deployed env or with deployed env vars locally.
-7. Run `AGENT_STORAGE_URL=https://your-service.up.railway.app npm run check:x402:smoke`.
-8. Optionally run `AGENT_STORAGE_URL=https://your-service.up.railway.app npm run check:x402:paid https://your-service.up.railway.app/v1/test/paid-ping`.
+7. Run `VAULTLINE_URL=https://your-service.up.railway.app npm run check:x402:smoke`.
+8. Optionally run `VAULTLINE_URL=https://your-service.up.railway.app npm run check:x402:paid https://your-service.up.railway.app/v1/test/paid-ping`.
 
 ## Required env vars
 

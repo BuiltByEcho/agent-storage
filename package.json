@@ -14,7 +14,9 @@
     "check:x402:facilitator": "tsx scripts-x402-facilitator-check.ts",
     "check:x402:paid": "tsx scripts-x402-paid-local.ts",
     "check:x402:smoke": "tsx scripts-x402-smoke.ts",
-    "docker:build": "docker build -t vaultline ."
+    "docker:build": "docker build -t vaultline .",
+    "check:prod": "tsx scripts-vaultline-production-smoke.ts --url https://storage.builtbyecho.xyz",
+    "check:prod:full": "tsx scripts-vaultline-production-smoke.ts --url https://storage.builtbyecho.xyz --paid-read"
   },
   "keywords": [
     "x402",

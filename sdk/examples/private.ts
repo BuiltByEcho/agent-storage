@@ -1,11 +1,11 @@
 import { privateKeyToAccount } from 'viem/accounts';
 import { VaultlineClient } from '../dist/index.js';
 
-const privateKey = process.env.X402_PAYER_PRIVATE_KEY as `0x${string}` | undefined;
-if (!privateKey) throw new Error('Missing X402_PAYER_PRIVATE_KEY');
+const privateKey = (process.env.VAULTLINE_PAYER_PRIVATE_KEY || process.env.X402_PAYER_PRIVATE_KEY) as `0x${string}` | undefined;
+if (!privateKey) throw new Error('Missing VAULTLINE_PAYER_PRIVATE_KEY');
 
 const client = new VaultlineClient({
-  baseUrl: process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001',
+  baseUrl: process.env.VAULTLINE_URL ?? process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001',
   account: privateKeyToAccount(privateKey),
 });
 

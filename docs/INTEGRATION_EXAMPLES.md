@@ -29,7 +29,7 @@ import { x402HTTPClient } from '@x402/core/http';
 import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
 import { privateKeyToAccount } from 'viem/accounts';
 
-const privateKey = process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`;
+const privateKey = process.env.VAULTLINE_PAYER_PRIVATE_KEY as `0x${string}`;
 const account = privateKeyToAccount(privateKey);
 
 const client = new x402Client().register(
@@ -77,8 +77,8 @@ import json
 import os
 import requests
 
-BASE_URL = os.getenv("AGENT_STORAGE_URL", "https://vaultline.example.com")
-PRIVATE_KEY = os.environ["X402_PAYER_PRIVATE_KEY"]
+BASE_URL = os.getenv("VAULTLINE_URL", "https://vaultline.example.com")
+PRIVATE_KEY = os.environ["VAULTLINE_PAYER_PRIVATE_KEY"]
 
 
 def create_payment_header(payment_required: dict, private_key: str) -> dict:

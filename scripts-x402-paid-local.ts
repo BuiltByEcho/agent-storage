@@ -5,12 +5,12 @@ import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const url = process.argv[2] ?? 'http://localhost:3001/v1/test/paid-ping';
-const privateKey = (process.env.X402_PAYER_PRIVATE_KEY || process.env.X402_TEST_PAYER_PRIVATE_KEY) as
+const privateKey = (process.env.VAULTLINE_PAYER_PRIVATE_KEY || process.env.X402_PAYER_PRIVATE_KEY || process.env.X402_TEST_PAYER_PRIVATE_KEY) as
   | `0x${string}`
   | undefined;
 
 if (!privateKey) {
-  console.error('Missing X402_PAYER_PRIVATE_KEY or X402_TEST_PAYER_PRIVATE_KEY');
+  console.error('Missing VAULTLINE_PAYER_PRIVATE_KEY, X402_PAYER_PRIVATE_KEY, or X402_TEST_PAYER_PRIVATE_KEY');
   process.exit(1);
 }
 

@@ -4,7 +4,7 @@
 
 Persistent file storage for autonomous agents, priced one request at a time.
 
-Vaultline, formerly Vaultline, lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
+Vaultline lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
 
 ```text
 request -> 402 -> sign -> retry -> done
@@ -89,6 +89,18 @@ Current default pricing:
 - list / head / delete: free
 - reads under `1 MB`: free
 
+## First successful upload
+
+If you just want to prove it works, follow `docs/QUICKSTART.md`. It walks through a funded Base USDC wallet, one paid upload, and a read-back with expected output.
+
+```bash
+npm install @builtbyecho/vaultline-sdk viem
+export VAULTLINE_PAYER_PRIVATE_KEY=0xYOUR_FUNDED_BASE_WALLET_PRIVATE_KEY
+export VAULTLINE_URL=https://storage.builtbyecho.xyz
+```
+
+Then run the copy-paste `first-upload.mjs` from `docs/QUICKSTART.md`.
+
 ## SDK quick start
 
 ```bash
@@ -99,7 +111,7 @@ npm install @builtbyecho/vaultline-sdk viem
 import { privateKeyToAccount } from 'viem/accounts';
 import { VaultlineClient } from '@builtbyecho/vaultline-sdk';
 
-const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
+const account = privateKeyToAccount(process.env.VAULTLINE_PAYER_PRIVATE_KEY as `0x${string}`);
 
 const client = new VaultlineClient({
   baseUrl: 'https://storage.builtbyecho.xyz',
@@ -155,6 +167,8 @@ npm run check:x402
 npm run check:x402:facilitator
 npm run check:x402:paid
 npm run check:x402:smoke
+npm run check:prod
+npm run check:prod:full
 ```
 
 ## Core routes
@@ -170,6 +184,7 @@ npm run check:x402:smoke
 
 ## Docs
 
+- `docs/QUICKSTART.md` — first successful upload + production smoke walkthrough
 - `docs/OVERVIEW.md` — product framing and positioning
 - `docs/API.md` — route behavior and payment flow
 - `docs/SDK.md` — developer SDK overview and usage

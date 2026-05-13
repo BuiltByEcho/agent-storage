@@ -1,6 +1,6 @@
 # Security Policy
 
-Vaultline / Vaultline is an x402-native storage service. Treat it as payment and storage infrastructure, not a demo toy.
+Vaultline is an x402-native storage service. Treat it as payment and storage infrastructure, not a demo toy.
 
 ## Supported surface
 

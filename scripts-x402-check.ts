@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-const baseUrl = process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001';
+const baseUrl = process.env.VAULTLINE_URL ?? process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001';
 const path = process.argv[2] ?? 'workspace/demo.txt';
 
 async function main() {

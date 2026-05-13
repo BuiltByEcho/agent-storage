@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-const STORAGE_API = process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001';
+const STORAGE_API = process.env.VAULTLINE_URL ?? process.env.AGENT_STORAGE_URL ?? 'http://localhost:3001';
 
 // Helper: make an x402-aware request to the storage API
 async function storageRequest(method: string, path: string, body?: Buffer | object): Promise<{ status: number; data: any }> {

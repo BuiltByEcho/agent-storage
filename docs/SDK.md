@@ -61,7 +61,7 @@ The package is live on npm and lives in this repo under `sdk/`.
 import { privateKeyToAccount } from 'viem/accounts';
 import { VaultlineClient } from '@builtbyecho/vaultline-sdk';
 
-const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
+const account = privateKeyToAccount(process.env.VAULTLINE_PAYER_PRIVATE_KEY as `0x${string}`);
 
 const client = new VaultlineClient({
   baseUrl: 'https://storage.builtbyecho.xyz',

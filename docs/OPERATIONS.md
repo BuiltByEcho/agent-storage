@@ -73,10 +73,35 @@ Operationally, that means:
 
 ## Production smoke tests
 
-### Basic deploy smoke
+### Production smoke: public + private
 
 ```bash
-AGENT_STORAGE_URL=https://your-service.example.com npm run check:x402:smoke
+VAULTLINE_PAYER_PRIVATE_KEY=0x... VAULTLINE_URL=https://your-service.example.com npm run check:prod
+```
+
+This checks:
+- health endpoint
+- paid public upload
+- public read-back for a small file
+- paid private upload
+- authenticated owner read-back
+- missing-auth private read returns `401`
+- wrong-wallet private read returns `403`
+- authenticated list includes the smoke objects
+- cleanup delete for smoke objects
+
+### Full production smoke: paid large reads
+
+```bash
+VAULTLINE_PAYER_PRIVATE_KEY=0x... VAULTLINE_URL=https://your-service.example.com npm run check:prod:full
+```
+
+This adds paid large public/private read coverage. At current minimums, expect roughly 5 × `$0.001` USDC in payments.
+
+### Legacy/basic deploy smoke
+
+```bash
+VAULTLINE_URL=https://your-service.example.com npm run check:x402:smoke
 ```
 
 This checks:
@@ -88,7 +113,7 @@ This checks:
 ### Paid ping check
 
 ```bash
-AGENT_STORAGE_URL=https://your-service.example.com npm run check:x402:paid https://your-service.example.com/v1/test/paid-ping
+VAULTLINE_URL=https://your-service.example.com npm run check:x402:paid https://your-service.example.com/v1/test/paid-ping
 ```
 
 ### Facilitator support check
@@ -118,5 +143,6 @@ Large paid reads use a minimum paid-read charge to avoid dust-sized x402 amounts
 A good deploy should satisfy all of these:
 - `GET /v1/health` returns 200
 - `npm run check:x402:facilitator` succeeds with Base mainnet support
-- `npm run check:x402:smoke` succeeds
+- `npm run check:prod` succeeds
+- `npm run check:prod:full` succeeds before public launches or after auth/payment changes
 - one paid route settles successfully on the deployed URL
