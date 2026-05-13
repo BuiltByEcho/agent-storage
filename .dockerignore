@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.git
+npm-debug.log
+test-r2.ts
+mcp/node_modules
+mcp/dist
