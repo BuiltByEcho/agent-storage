@@ -7,6 +7,7 @@ export function calculatePaymentAmount(
   tier: StorageTier = 'open'
 ): number {
   const MIN_WRITE_CHARGE = 0.001;
+  const MIN_READ_CHARGE = 0.001;
   const MIN_STORAGE_CHARGE = 0.001;
 
   switch (operation) {
@@ -16,7 +17,7 @@ export function calculatePaymentAmount(
     }
     case 'read': {
       if (sizeBytes <= PRICING.freeReadMaxBytes) return 0;
-      return calculateRetrievalCost(sizeBytes, tier);
+      return Math.max(calculateRetrievalCost(sizeBytes, tier), MIN_READ_CHARGE);
     }
     case 'delete':
       return 0;

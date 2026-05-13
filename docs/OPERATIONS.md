@@ -111,7 +111,7 @@ R2 TLS works correctly with normal verification on Node 24.15.0 in this repo. If
 
 ### 3) Very small paid reads
 
-Large paid reads are working. Tiny paid reads may still be awkward because the quoted amount becomes extremely small.
+Large paid reads use a minimum paid-read charge to avoid dust-sized x402 amounts.
 
 ## What “healthy” looks like
 

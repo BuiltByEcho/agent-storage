@@ -72,12 +72,12 @@ Current default pricing:
 
 **Open**
 - storage: `$0.08 / GB / month`
-- retrieval: `$0.015 / GB`
+- retrieval: `$0.015 / GB` after free threshold, minimum paid read `$0.001`
 - write: `$0.03 / GB`
 
 **Private**
 - storage: `$0.12 / GB / month`
-- retrieval: `$0.02 / GB`
+- retrieval: `$0.02 / GB` after free threshold, minimum paid read `$0.001`
 - write: `$0.045 / GB`
 
 **Encrypted**

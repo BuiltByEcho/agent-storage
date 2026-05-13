@@ -19,10 +19,13 @@ describe('tier pricing', () => {
     );
   });
 
-  it('charges more for private retrieval than open retrieval above free threshold', () => {
+  it('charges more raw retrieval for private than open above free threshold', () => {
     expect(calculateRetrievalCost(twoMb, 'private')).toBeGreaterThan(calculateRetrievalCost(twoMb, 'open'));
-    expect(calculatePaymentAmount('read', twoMb, 'private')).toBeGreaterThan(
-      calculatePaymentAmount('read', twoMb, 'open')
-    );
+  });
+
+  it('applies a minimum paid read charge above the free threshold', () => {
+    expect(calculatePaymentAmount('read', 1024, 'open')).toBe(0);
+    expect(calculatePaymentAmount('read', twoMb, 'open')).toBe(0.001);
+    expect(calculatePaymentAmount('read', twoMb, 'private')).toBe(0.001);
   });
 });
