@@ -1,7 +1,7 @@
 {
   "name": "@builtbyecho/agent-storage",
   "version": "0.1.0",
-  "description": "Dropbox for Agents — persistent file storage with x402 payments",
+  "description": "Vaultline \u2014 x402-native file storage for autonomous agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

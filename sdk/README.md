@@ -1,6 +1,8 @@
 # @builtbyecho/agent-storage-sdk
 
-TypeScript SDK for AgentStorage.
+TypeScript SDK for **Vaultline** — x402-native storage rails for autonomous agents.
+
+Live API: `https://storage.builtbyecho.xyz`
 
 This SDK removes the biggest friction points for developers:
 - x402 pay-and-retry handling
@@ -32,7 +34,7 @@ import { AgentStorageClient } from '@builtbyecho/agent-storage-sdk';
 const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
 
 const client = new AgentStorageClient({
-  baseUrl: 'https://agent-storage.example.com',
+  baseUrl: 'https://storage.builtbyecho.xyz',
   account,
   timeoutMs: 30_000,
 });
@@ -92,7 +94,7 @@ Requests default to a 30 second timeout using `AbortSignal.timeout`. Override pe
 
 ```ts
 const client = new AgentStorageClient({
-  baseUrl: 'https://agent-storage.example.com',
+  baseUrl: 'https://storage.builtbyecho.xyz',
   account,
   timeoutMs: 10_000,
 });
@@ -106,6 +108,12 @@ const client = new AgentStorageClient({
 - private-tier wallet auth headers
 - typed error creation with parsed response bodies
 - default request timeouts
+
+## Pricing notes
+
+- reads under `1 MB` are free
+- paid reads above the free threshold have a `$0.001` minimum to avoid dust-sized x402 payments
+- write and storage pricing are exposed by the live API metadata/routes
 
 ## Notes
 

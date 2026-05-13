@@ -1,6 +1,6 @@
-# AgentStorage SDK
+# Vaultline SDK
 
-The first developer SDK for AgentStorage is a TypeScript package in this repo:
+The developer SDK for Vaultline is a TypeScript package in this repo:
 
 - package path: `sdk/`
 - package name: `@builtbyecho/agent-storage-sdk`
@@ -50,10 +50,10 @@ Package polish now includes:
 When published, developers will use:
 
 ```bash
-npm install @builtbyecho/agent-storage-sdk
+npm install @builtbyecho/agent-storage-sdk viem
 ```
 
-For now, the package lives in this repo under `sdk/`.
+The package is live on npm and lives in this repo under `sdk/`.
 
 ## Quick start
 
@@ -64,7 +64,7 @@ import { AgentStorageClient } from '@builtbyecho/agent-storage-sdk';
 const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
 
 const client = new AgentStorageClient({
-  baseUrl: 'https://agent-storage.example.com',
+  baseUrl: 'https://storage.builtbyecho.xyz',
   account,
 });
 ```

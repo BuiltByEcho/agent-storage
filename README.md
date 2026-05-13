@@ -1,10 +1,10 @@
-# AgentStorage
+# Vaultline
 
-**Dropbox for Agents**
+**Dropbox for Agents — live at `https://storage.builtbyecho.xyz`**
 
 Persistent file storage for autonomous agents, priced one request at a time.
 
-AgentStorage lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
+Vaultline, formerly AgentStorage, lets agents buy uploads and downloads directly over HTTP using x402 v2 on Base mainnet. Instead of forcing every client through buyer accounts, API keys, and dashboard billing, it treats payment as the access primitive.
 
 ```text
 request -> 402 -> sign -> retry -> done
@@ -27,7 +27,7 @@ Agents want:
 - no signup flow in the critical path
 - cryptographic settlement
 
-AgentStorage is built around that shape.
+Vaultline is built around that shape.
 
 ## What it does
 
@@ -43,7 +43,7 @@ AgentStorage is built around that shape.
 
 ## Why it’s interesting
 
-AgentStorage is not just “S3 with crypto.”
+Vaultline is not just “S3 with crypto.”
 
 The point is that storage becomes a machine-buyable capability.
 An agent can discover a price, authorize payment, retry the same request, and continue its workflow without a human in the loop.
@@ -56,7 +56,7 @@ That opens up patterns like:
 
 ## Current state
 
-Verified locally:
+Verified in production at `https://storage.builtbyecho.xyz`:
 - x402 v2 flow on Base mainnet
 - paid ping route
 - paid uploads
@@ -65,6 +65,7 @@ Verified locally:
 - R2 storage operations
 - integration tests
 - deploy smoke scripts
+- paid upload, free read, private wallet-gated read, and paid large read against the live endpoint
 
 ## Pricing
 
@@ -88,7 +89,32 @@ Current default pricing:
 - list / head / delete: free
 - reads under `1 MB`: free
 
-## Quick start
+## SDK quick start
+
+```bash
+npm install @builtbyecho/agent-storage-sdk viem
+```
+
+```ts
+import { privateKeyToAccount } from 'viem/accounts';
+import { AgentStorageClient } from '@builtbyecho/agent-storage-sdk';
+
+const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${string}`);
+
+const client = new AgentStorageClient({
+  baseUrl: 'https://storage.builtbyecho.xyz',
+  account,
+});
+
+await client.upload('workspace/demo.txt', 'hello from Vaultline', {
+  contentType: 'text/plain',
+});
+
+const result = await client.downloadText('workspace/demo.txt');
+console.log(result.text);
+```
+
+## Local server quick start
 
 ```bash
 cd projects/agent-storage
@@ -168,4 +194,4 @@ npm run check:x402:smoke
 
 ## Short thesis
 
-AgentStorage turns file storage into a paid HTTP primitive for agents.
+Vaultline turns file storage into a paid HTTP primitive for agents.
