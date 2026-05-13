@@ -107,6 +107,40 @@ describe('VaultlineClient', () => {
     expect(headers.get('x-auth-wallet')).toBe(account.address);
   });
 
+  it('creates private share links with wallet auth headers', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse({
+        ok: true,
+        token: 'token',
+        url: '/v1/shares/token',
+        key: 'secret.txt',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        expiresInSeconds: 60,
+      })
+    );
+
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
+    const share = await client.createShare('secret.txt', { tier: 'private', expiresInSeconds: 60 });
+
+    expect(share.data.url).toBe('https://vaultline.example.com/v1/shares/token');
+    expect(fetchMock).toHaveBeenCalledWith('https://vaultline.example.com/v1/shares', expect.objectContaining({ method: 'POST' }));
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
+    expect(headers.get('content-type')).toBe('application/json');
+    expect(headers.get('x-auth-wallet')).toBe(account.address);
+    expect(headers.get('x-auth-signature')).toBeTruthy();
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({ path: 'secret.txt', expiresInSeconds: 60 });
+  });
+
+  it('downloads share links without wallet auth or x402 handling', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response('shared text'));
+    const client = new VaultlineClient({ baseUrl: 'https://vaultline.example.com', account, fetch: fetchMock });
+
+    const result = await client.downloadShareText('token');
+
+    expect(result.text).toBe('shared text');
+    expect(fetchMock).toHaveBeenCalledWith('https://vaultline.example.com/v1/shares/token', expect.objectContaining({ method: 'GET' }));
+  });
+
   it('throws typed errors with parsed response bodies for failed SDK helpers', async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
       jsonResponse({ error: 'file not found', key: 'missing.txt' }, { status: 404, statusText: 'Not Found' })

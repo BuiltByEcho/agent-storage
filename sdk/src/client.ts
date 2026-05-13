@@ -6,12 +6,14 @@ import { createStorageAuthHeaders, normalizeStoragePath } from './auth.js';
 import { assertOkResponse } from './errors.js';
 import type {
   VaultlineClientOptions,
+  CreateShareOptions,
   DeleteOptions,
   DeleteResponse,
   DownloadOptions,
   HeadOptions,
   ListOptions,
   ListResponse,
+  ShareResponse,
   StorageTier,
   UploadOptions,
   UploadResponse,
@@ -131,6 +133,63 @@ export class VaultlineClient {
     return {
       response,
       data: (await response.json()) as ListResponse,
+    };
+  }
+
+  async createShare(path: string, options: CreateShareOptions = {}) {
+    const normalizedPath = normalizeStoragePath(path);
+    const headers = new Headers({ 'content-type': 'application/json' });
+    if (options.tier === 'private') {
+      const authHeaders = await createStorageAuthHeaders({
+        account: this.account,
+        method: 'POST',
+        path: normalizedPath,
+      });
+      for (const [key, value] of Object.entries(authHeaders)) headers.set(key, value);
+    }
+
+    const response = await this.request('/v1/shares', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ path: normalizedPath, expiresInSeconds: options.expiresInSeconds }),
+    });
+
+    await assertOkResponse(response, { method: 'POST', url: `${this.baseUrl}/v1/shares` });
+    const data = (await response.json()) as ShareResponse;
+    return {
+      response,
+      data: {
+        ...data,
+        url: data.url.startsWith('http') ? data.url : `${this.baseUrl}${data.url}`,
+      },
+    };
+  }
+
+  async downloadShare(shareUrlOrToken: string) {
+    const path = shareUrlOrToken.startsWith('http')
+      ? new URL(shareUrlOrToken).pathname
+      : shareUrlOrToken.startsWith('/v1/shares/')
+        ? shareUrlOrToken
+        : `/v1/shares/${shareUrlOrToken}`;
+    const response = await this.fetchImpl(`${this.baseUrl}${path}`, this.withTimeout({ method: 'GET' }));
+    await assertOkResponse(response, { method: 'GET', url: `${this.baseUrl}${path}` });
+    return {
+      response,
+      data: new Uint8Array(await response.arrayBuffer()),
+    };
+  }
+
+  async downloadShareText(shareUrlOrToken: string) {
+    const path = shareUrlOrToken.startsWith('http')
+      ? new URL(shareUrlOrToken).pathname
+      : shareUrlOrToken.startsWith('/v1/shares/')
+        ? shareUrlOrToken
+        : `/v1/shares/${shareUrlOrToken}`;
+    const response = await this.fetchImpl(`${this.baseUrl}${path}`, this.withTimeout({ method: 'GET' }));
+    await assertOkResponse(response, { method: 'GET', url: `${this.baseUrl}${path}` });
+    return {
+      response,
+      text: await response.text(),
     };
   }
 

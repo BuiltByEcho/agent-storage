@@ -34,6 +34,7 @@ Vaultline is built around that shape.
 - paid uploads
 - open storage for shared/public-by-key objects
 - wallet-based private storage for owner-only or allowlisted reads
+- signed, expiring share links for handing files to another agent or human
 - encrypted storage planned as a higher-privacy tier *(coming soon)*
 - free small downloads under a configurable threshold
 - paid large downloads
@@ -175,6 +176,8 @@ npm run check:prod:full
 
 - `PUT /v1/files/{path}` — paid upload
 - `GET /v1/files/{path}` — free for small files, paid for larger reads
+- `POST /v1/shares` — create an expiring share link for an existing file
+- `GET /v1/shares/{token}` — retrieve a file through a signed expiring share link
 - `DELETE /v1/files/{path}` — free delete
 - `HEAD /v1/files/{path}` — free metadata
 - `GET /v1/list/{prefix}` — free listing

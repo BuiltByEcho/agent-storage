@@ -36,6 +36,11 @@ export type ListOptions = {
   includePrivate?: boolean;
 };
 
+export type CreateShareOptions = {
+  tier?: StorageTier;
+  expiresInSeconds?: number;
+};
+
 export type UploadResponse = {
   ok: boolean;
   file: {
@@ -70,4 +75,13 @@ export type ListResponse = {
   directories: string[];
   prefix: string;
   truncated: boolean;
+};
+
+export type ShareResponse = {
+  ok: boolean;
+  token: string;
+  url: string;
+  key: string;
+  expiresAt: string;
+  expiresInSeconds: number;
 };

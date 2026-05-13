@@ -13,6 +13,7 @@ import { calculatePaymentAmount } from '../pricing.js';
 import { PRICING, X402_CONFIG } from '../config.js';
 import { getResourceServer, X402_MAINNET_NETWORK } from '../cdpFacilitator.js';
 import { parseWalletList, verifyStorageRequestAuth, type AuthenticatedWallet } from '../auth.js';
+import { createShareToken, normalizeExpiresInSeconds, verifyShareToken } from '../share.js';
 
 const router = Router();
 const resourceServer = getResourceServer();
@@ -180,6 +181,64 @@ router.delete('/v1/files/*path', authorizePrivateFileAccess, async (req, res) =>
     res.json({ ok: true, deleted: filePath });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/v1/shares', async (req, res) => {
+  const filePath = getParamPath((req.body as { path?: unknown } | undefined)?.path);
+  if (!filePath) {
+    res.status(400).json({ error: 'Valid share path required' });
+    return;
+  }
+
+  try {
+    const meta = await getFileMetadata(filePath);
+    if (meta.tier === 'private') {
+      const authWallet = await verifyRequestWalletForMethod(req as RouteRequest, filePath, 'POST');
+      if (!canAccessPrivateFile(meta, authWallet.wallet)) {
+        res.status(403).json({ error: 'Wallet is not authorized to share this private file' });
+        return;
+      }
+    }
+
+    const expiresInSeconds = normalizeExpiresInSeconds((req.body as { expiresInSeconds?: unknown } | undefined)?.expiresInSeconds);
+    const share = createShareToken({ key: filePath, expiresInSeconds });
+    res.json({
+      ok: true,
+      token: share.token,
+      url: `/v1/shares/${share.token}`,
+      key: filePath,
+      expiresAt: share.expiresAt,
+      expiresInSeconds: share.expiresInSeconds,
+    });
+  } catch (err: any) {
+    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+    const status = err.message?.includes('Missing x-auth-') || err.message?.includes('Invalid x-auth-') || err.message?.includes('expired') || err.message?.includes('Invalid wallet signature') ? 401 : 500;
+    res.status(status).json({ error: err.message });
+  }
+});
+
+router.get('/v1/shares/:token', async (req, res) => {
+  try {
+    const token = req.params.token;
+    const payload = verifyShareToken(token);
+    const result = await downloadFile(payload.key);
+    res.setHeader('Content-Type', result.metadata.contentType ?? 'application/octet-stream');
+    res.setHeader('X-Vaultline-Share-Key', payload.key);
+    res.setHeader('X-Vaultline-Share-Expires-At', new Date(payload.exp * 1000).toISOString());
+    res.setHeader('X-Storage-Tier', result.metadata.tier);
+    res.setHeader('X-Storage-Cost', '0.000000');
+    res.send(result.data);
+  } catch (err: any) {
+    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+    const status = err.message?.includes('expired') ? 410 : err.message?.includes('Invalid share token') ? 401 : 500;
+    res.status(status).json({ error: err.message });
   }
 });
 
@@ -356,8 +415,12 @@ function getRequestedStorageTier(req: RouteRequest): 'open' | 'private' {
 }
 
 async function verifyRequestWallet(req: RouteRequest, filePath: string) {
+  return verifyRequestWalletForMethod(req, filePath, req.method);
+}
+
+async function verifyRequestWalletForMethod(req: RouteRequest, filePath: string, method: string) {
   return verifyStorageRequestAuth({
-    method: req.method,
+    method,
     path: filePath,
     wallet: getHeader(req.headers, 'x-auth-wallet'),
     signature: getHeader(req.headers, 'x-auth-signature'),

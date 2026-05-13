@@ -90,6 +90,13 @@ async function main() {
   record({ step: 'private-owner-read', status: privateRead.response.status, matches: privateRead.text === smallBody, bytes: privateRead.text.length, cost: privateRead.response.headers.get('x-storage-cost') });
   if (privateRead.text !== smallBody) throw new Error('Private owner read content mismatch');
 
+  const share = await client.createShare(privateKeyPath, { tier: 'private', expiresInSeconds: 300 });
+  record({ step: 'private-share-created', status: share.response.status, key: share.data.key, expiresAt: share.data.expiresAt });
+  const sharedRead = await fetch(share.data.url);
+  const sharedText = await sharedRead.text();
+  record({ step: 'private-share-read', status: sharedRead.status, matches: sharedText === smallBody, bytes: sharedText.length, tier: sharedRead.headers.get('x-storage-tier') });
+  if (sharedText !== smallBody) throw new Error('Private share read content mismatch');
+
   const unauthorized = privateKeyToAccount(generatePrivateKey());
   const unauthorizedClient = new VaultlineClient({ baseUrl, account: unauthorized, timeoutMs: 30_000 });
   await expectBlocked('private-read-unauthorized-wallet', () => unauthorizedClient.downloadText(privateKeyPath, { tier: 'private' }), 403);

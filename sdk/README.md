@@ -70,6 +70,23 @@ const result = await client.downloadText('workspace/secret.txt', {
 console.log(result.text);
 ```
 
+
+## Share links
+
+Create signed, expiring share links when another agent or human needs retrieval access without holding the owner wallet. Private files require owner/allowlisted wallet auth when creating the share.
+
+```ts
+const share = await client.createShare('workspace/secret.txt', {
+  tier: 'private',
+  expiresInSeconds: 300,
+});
+
+console.log(share.data.url);
+
+const shared = await client.downloadShareText(share.data.url);
+console.log(shared.text);
+```
+
 ## Typed errors
 
 SDK helper methods throw `VaultlineError` for non-2xx responses after any x402 retry is complete. The parsed JSON/text response body is attached for logging, retries, and agent decision-making.

@@ -332,6 +332,52 @@ describe('x402 integration', () => {
     expect(head.headers.get('x-storage-cost-if-read')).toBeTruthy();
     expect(head.headers.get('x-storage-cost')).toBeNull();
   });
+
+  it('creates expiring share links for private files without exposing wallet auth', async () => {
+    const body = Buffer.from('share me with another agent');
+    const upload = await makePaidRequest('PUT', `${baseUrl}/v1/files/share/private.txt`, body, {
+      'content-type': 'text/plain',
+      'x-storage-tier': 'private',
+      ...(await authHeaders(payer, 'PUT', 'share/private.txt')),
+    });
+    expect(upload.status).toBe(200);
+
+    const noAuthShare = await fetch(`${baseUrl}/v1/shares`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ path: 'share/private.txt', expiresInSeconds: 60 }),
+    });
+    expect(noAuthShare.status).toBe(401);
+
+    const intruderShare = await fetch(`${baseUrl}/v1/shares`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(await authHeaders(intruder, 'POST', 'share/private.txt')),
+      },
+      body: JSON.stringify({ path: 'share/private.txt', expiresInSeconds: 60 }),
+    });
+    expect(intruderShare.status).toBe(403);
+
+    const ownerShare = await fetch(`${baseUrl}/v1/shares`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(await authHeaders(payer, 'POST', 'share/private.txt')),
+      },
+      body: JSON.stringify({ path: 'share/private.txt', expiresInSeconds: 60 }),
+    });
+    expect(ownerShare.status).toBe(200);
+    const shareJson = await ownerShare.json();
+    expect(shareJson).toMatchObject({ ok: true, key: 'share/private.txt', expiresInSeconds: 60 });
+    expect(shareJson.url).toMatch(/^\/v1\/shares\//);
+
+    const sharedRead = await fetch(`${baseUrl}${shareJson.url}`);
+    expect(sharedRead.status).toBe(200);
+    expect(sharedRead.headers.get('x-vaultline-share-key')).toBe('share/private.txt');
+    expect(sharedRead.headers.get('x-storage-tier')).toBe('private');
+    expect(await sharedRead.text()).toBe('share me with another agent');
+  });
 });
 
 async function makePaidRequest(

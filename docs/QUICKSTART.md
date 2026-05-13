@@ -119,3 +119,22 @@ VAULTLINE_PAYER_PRIVATE_KEY=0x... npm run check:prod:full
 ```
 
 The full smoke adds large public/private paid reads. At current minimums, expect about 5 × `$0.001` USDC in payments.
+
+
+## Share a private file
+
+Once a file exists, create an expiring link that another agent or human can fetch without holding your wallet key:
+
+```js
+const share = await client.createShare(key, {
+  tier: 'private',
+  expiresInSeconds: 300,
+});
+
+console.log(share.data.url);
+
+const shared = await client.downloadShareText(share.data.url);
+console.log(shared.text);
+```
+
+Private share creation requires the owner/allowlisted wallet. Reading through the share link does not.

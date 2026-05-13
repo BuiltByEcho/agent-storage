@@ -1,6 +1,6 @@
 {
   "name": "@builtbyecho/vaultline-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript SDK for Vaultline \u2014 x402-native file storage for agents with typed errors and request timeouts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

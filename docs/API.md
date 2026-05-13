@@ -216,3 +216,38 @@ For the deeper product/usage guidance, see `docs/STORAGE_TIERS.md`.
 - `npm run check:x402` — validate a 402 discovery response
 - `npm run check:x402:paid` — exercise the paid ping route
 - `npm run check:x402:smoke` — health + paid upload + free read smoke test
+
+
+## Share links
+
+### `POST /v1/shares`
+
+Create a signed, expiring retrieval link for an existing file.
+
+Request body:
+
+```json
+{
+  "path": "workspace/report.txt",
+  "expiresInSeconds": 300
+}
+```
+
+For `private` files, include wallet-auth headers signed with method `POST` and the file path. Open files do not require wallet auth to create a share because they are already public-by-key.
+
+Response:
+
+```json
+{
+  "ok": true,
+  "token": "...",
+  "url": "/v1/shares/...",
+  "key": "workspace/report.txt",
+  "expiresAt": "2026-05-13T18:00:00.000Z",
+  "expiresInSeconds": 300
+}
+```
+
+### `GET /v1/shares/{token}`
+
+Retrieve the shared file until the token expires. This does not require the original owner wallet. Expired tokens return `410`; malformed or tampered tokens return `401`.

@@ -22,10 +22,11 @@ export function createApp() {
   app.use((req, _res, next) => {
     const paymentHeader = req.headers['x-payment'] || req.headers['payment-signature'];
     const hasXPayment = Boolean(paymentHeader);
+    const logPath = req.path.startsWith('/v1/shares/') ? '/v1/shares/[redacted]' : req.path;
     if (req.path.startsWith('/v1/test/paid-ping')) {
-      console.log(`${new Date().toISOString()} ${req.method} ${req.path} paymentHeader=${hasXPayment ? 'yes' : 'no'}`);
+      console.log(`${new Date().toISOString()} ${req.method} ${logPath} paymentHeader=${hasXPayment ? 'yes' : 'no'}`);
     } else {
-      console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+      console.log(`${new Date().toISOString()} ${req.method} ${logPath}`);
     }
     next();
   });
