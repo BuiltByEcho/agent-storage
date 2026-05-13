@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { privateKeyToAccount } from 'viem/accounts';
 import { AgentStorageClient } from '../src/client.js';
+import { AgentStorageError } from '../src/errors.js';
 
 const privateKey = '0x39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad39ad' as const;
 const account = privateKeyToAccount(privateKey);
@@ -104,5 +105,41 @@ describe('AgentStorageClient', () => {
 
     const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers);
     expect(headers.get('x-auth-wallet')).toBe(account.address);
+  });
+
+  it('throws typed errors with parsed response bodies for failed SDK helpers', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse({ error: 'file not found', key: 'missing.txt' }, { status: 404, statusText: 'Not Found' })
+    );
+
+    const client = new AgentStorageClient({ baseUrl: 'https://agent-storage.example.com', account, fetch: fetchMock });
+
+    await expect(client.downloadText('missing.txt')).rejects.toMatchObject({
+      name: 'AgentStorageError',
+      status: 404,
+      body: { error: 'file not found', key: 'missing.txt' },
+    });
+  });
+
+  it('passes an abort signal when a default timeout is configured', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse({ files: [], directories: [], prefix: '', truncated: false })
+    );
+
+    const client = new AgentStorageClient({
+      baseUrl: 'https://agent-storage.example.com',
+      account,
+      fetch: fetchMock,
+      timeoutMs: 5000,
+    });
+    await client.list('workspace');
+
+    expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('exports AgentStorageError for instanceof checks', () => {
+    const error = new AgentStorageError('boom', { status: 500 });
+    expect(error).toBeInstanceOf(AgentStorageError);
+    expect(error.status).toBe(500);
   });
 });

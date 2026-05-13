@@ -3,6 +3,7 @@ import { x402HTTPClient } from '@x402/core/http';
 import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm';
 import type { PrivateKeyAccount } from 'viem/accounts';
 import { createStorageAuthHeaders, normalizeStoragePath } from './auth.js';
+import { assertOkResponse } from './errors.js';
 import type {
   AgentStorageClientOptions,
   DeleteOptions,
@@ -22,11 +23,13 @@ export class AgentStorageClient {
   readonly fetchImpl: typeof fetch;
   readonly client: x402Client;
   readonly httpClient: x402HTTPClient;
+  readonly timeoutMs: number;
 
   constructor(options: AgentStorageClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.account = options.account;
     this.fetchImpl = options.fetch ?? fetch;
+    this.timeoutMs = options.timeoutMs ?? 30_000;
     this.client = new x402Client().register('eip155:*', new ExactEvmScheme(toClientEvmSigner(this.account)));
     this.httpClient = new x402HTTPClient(this.client);
   }
@@ -56,6 +59,7 @@ export class AgentStorageClient {
       headers,
     });
 
+    await assertOkResponse(response, { method: 'PUT', url: `${this.baseUrl}/v1/files/${normalizedPath}` });
     return {
       response,
       data: (await response.json()) as UploadResponse,
@@ -69,6 +73,7 @@ export class AgentStorageClient {
       headers: await this.buildAccessHeaders('GET', normalizedPath, options.tier),
     });
 
+    await assertOkResponse(response, { method: 'GET', url: `${this.baseUrl}/v1/files/${normalizedPath}` });
     return {
       response,
       data: new Uint8Array(await response.arrayBuffer()),
@@ -82,6 +87,7 @@ export class AgentStorageClient {
       headers: await this.buildAccessHeaders('GET', normalizedPath, options.tier),
     });
 
+    await assertOkResponse(response, { method: 'GET', url: `${this.baseUrl}/v1/files/${normalizedPath}` });
     return {
       response,
       text: await response.text(),
@@ -90,10 +96,11 @@ export class AgentStorageClient {
 
   async head(path: string, options: HeadOptions = {}) {
     const normalizedPath = normalizeStoragePath(path);
-    return this.request(`/v1/files/${normalizedPath}`, {
+    const response = await this.request(`/v1/files/${normalizedPath}`, {
       method: 'HEAD',
       headers: await this.buildAccessHeaders('HEAD', normalizedPath, options.tier),
     });
+    return assertOkResponse(response, { method: 'HEAD', url: `${this.baseUrl}/v1/files/${normalizedPath}` });
   }
 
   async delete(path: string, options: DeleteOptions = {}) {
@@ -103,6 +110,7 @@ export class AgentStorageClient {
       headers: await this.buildAccessHeaders('DELETE', normalizedPath, options.tier),
     });
 
+    await assertOkResponse(response, { method: 'DELETE', url: `${this.baseUrl}/v1/files/${normalizedPath}` });
     return {
       response,
       data: (await response.json()) as DeleteResponse,
@@ -119,6 +127,7 @@ export class AgentStorageClient {
         : undefined,
     });
 
+    await assertOkResponse(response, { method: 'GET', url: `${this.baseUrl}${suffix}` });
     return {
       response,
       data: (await response.json()) as ListResponse,
@@ -127,7 +136,8 @@ export class AgentStorageClient {
 
   async request(path: string, init: RequestInit = {}) {
     const url = `${this.baseUrl}${path}`;
-    const initial = await this.fetchImpl(url, init);
+    const requestInit = this.withTimeout(init);
+    const initial = await this.fetchImpl(url, requestInit);
     if (initial.status !== 402) return initial;
 
     const bodyText = await initial.text();
@@ -142,10 +152,18 @@ export class AgentStorageClient {
     const paymentHeaders = this.httpClient.encodePaymentSignatureHeader(paymentPayload);
     for (const [key, value] of Object.entries(paymentHeaders)) headers.set(key, value);
 
-    return this.fetchImpl(url, {
+    return this.fetchImpl(url, this.withTimeout({
       ...init,
       headers,
-    });
+    }));
+  }
+
+  private withTimeout(init: RequestInit) {
+    if (!this.timeoutMs || init.signal) return init;
+    return {
+      ...init,
+      signal: AbortSignal.timeout(this.timeoutMs),
+    };
   }
 
   private async buildAccessHeaders(method: string, path: string, tier: StorageTier = 'open') {

@@ -6,6 +6,8 @@ export type AgentStorageClientOptions = {
   baseUrl: string;
   account: PrivateKeyAccount;
   fetch?: typeof fetch;
+  /** Default request timeout in milliseconds. Pass 0 to disable. */
+  timeoutMs?: number;
 };
 
 export type PrivateAccessOptions = {

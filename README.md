@@ -148,6 +148,7 @@ npm run check:x402:smoke
 - `docs/API.md` — route behavior and payment flow
 - `docs/SDK.md` — developer SDK overview and usage
 - `docs/SDK_PUBLISHING.md` — SDK publish checklist
+- `docs/SDK_RELEASE_v0.1.1.md` — SDK hardening release notes
 - `docs/SDK_RELEASE_v0.1.0.md` — SDK release notes for first publish
 - `docs/STORAGE_TIERS.md` — open vs private vs encrypted-tier guide
 - `docs/ARCHITECTURE.md` — internals and system design

@@ -2,9 +2,11 @@
 
 TypeScript SDK for AgentStorage.
 
-This SDK removes the two biggest friction points for developers:
+This SDK removes the biggest friction points for developers:
 - x402 pay-and-retry handling
 - wallet-auth header creation for private storage
+- typed failures you can safely catch in agents and CLIs
+- default request timeouts so long-running agent workflows do not hang forever
 
 ## Current status
 
@@ -32,6 +34,7 @@ const account = privateKeyToAccount(process.env.X402_PAYER_PRIVATE_KEY as `0x${s
 const client = new AgentStorageClient({
   baseUrl: 'https://agent-storage.example.com',
   account,
+  timeoutMs: 30_000,
 });
 ```
 
@@ -65,12 +68,44 @@ const result = await client.downloadText('workspace/secret.txt', {
 console.log(result.text);
 ```
 
+## Typed errors
+
+SDK helper methods throw `AgentStorageError` for non-2xx responses after any x402 retry is complete. The parsed JSON/text response body is attached for logging, retries, and agent decision-making.
+
+```ts
+import { AgentStorageClient, AgentStorageError } from '@builtbyecho/agent-storage-sdk';
+
+try {
+  await client.downloadText('workspace/missing.txt');
+} catch (error) {
+  if (error instanceof AgentStorageError && error.status === 404) {
+    console.log('not found', error.body);
+  } else {
+    throw error;
+  }
+}
+```
+
+## Timeouts
+
+Requests default to a 30 second timeout using `AbortSignal.timeout`. Override per client, or pass `0` to disable.
+
+```ts
+const client = new AgentStorageClient({
+  baseUrl: 'https://agent-storage.example.com',
+  account,
+  timeoutMs: 10_000,
+});
+```
+
 ## What the SDK handles automatically
 
 - `402 Payment Required` parsing
 - x402 payment payload creation
 - retry with payment headers
 - private-tier wallet auth headers
+- typed error creation with parsed response bodies
+- default request timeouts
 
 ## Notes
 
