@@ -1,6 +1,20 @@
 ---
 name: vaultline
 description: Use when an agent needs to store, retrieve, list, inspect, or delete files through Vaultline, or when it needs to choose between open and private storage tiers, construct the required wallet-auth headers for private objects, or follow the x402 pay-and-retry flow for uploads and downloads. Also use when explaining that encrypted storage is coming soon but not live.
+version: 0.1.1
+metadata:
+  openclaw:
+    homepage: https://github.com/BuiltByEcho/vaultline
+    requires:
+      bins:
+        - node
+        - npm
+    install:
+      - id: vaultline-sdk
+        kind: node
+        package: "@builtbyecho/vaultline-sdk"
+        bins: []
+        label: Install Vaultline SDK from npm
 ---
 
 # Vaultline

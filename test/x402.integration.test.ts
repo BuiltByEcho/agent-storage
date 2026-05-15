@@ -1,3 +1,4 @@
+import { rm } from 'node:fs/promises';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -27,6 +28,7 @@ const payer = privateKeyToAccount(payerKey);
 const intruder = privateKeyToAccount(intruderKey);
 const client = new x402Client().register('eip155:*', new ClientExactEvmScheme(toClientEvmSigner(payer)));
 const httpClient = new x402HTTPClient(client);
+const usageLedgerPath = `state/test-usage-events-${Date.now()}.jsonl`;
 
 const resourceServer = new x402ResourceServer({
   async getSupported() {
@@ -161,6 +163,7 @@ describe('x402 integration', () => {
     process.env.X402_TREASURY_WALLET = payTo;
     process.env.X402_USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
     process.env.FREE_READ_MAX_BYTES = '1048576';
+    process.env.VAULTLINE_USAGE_LEDGER_PATH = usageLedgerPath;
 
     await resourceServer.initialize();
     const { createApp } = await import('../src/app.ts');
@@ -178,8 +181,9 @@ describe('x402 integration', () => {
     await closeServer?.();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     files.clear();
+    await rm(usageLedgerPath, { force: true });
   });
 
   it('requires payment then accepts a paid upload', async () => {
@@ -378,6 +382,21 @@ describe('x402 integration', () => {
     expect(sharedRead.headers.get('x-storage-tier')).toBe('private');
     expect(await sharedRead.text()).toBe('share me with another agent');
   });
+
+  it('reports API calls, paid calls, unique users, and revenue from the usage ledger', async () => {
+    const body = Buffer.from('meter this upload');
+    const paid = await makePaidRequest('PUT', `${baseUrl}/v1/files/metered.txt`, body, { 'content-type': 'text/plain' });
+    expect(paid.status).toBe(200);
+
+    const usage = await waitForUsageSummary(baseUrl);
+    expect(usage.totalFiles).toBe(1);
+    expect(usage.metering.windows.allTime.calls).toBeGreaterThanOrEqual(2);
+    expect(usage.metering.windows.allTime.paidCalls).toBeGreaterThanOrEqual(1);
+    expect(usage.metering.windows.allTime.revenueUsd).toBeGreaterThanOrEqual(0.001);
+    expect(usage.metering.windows.allTime.uniqueUsers).toBeGreaterThanOrEqual(1);
+    expect(usage.metering.windows.allTime.byEndpoint.some((item: any) => item.endpoint === 'PUT /v1/files/*')).toBe(true);
+    expect(usage.metering.revenueVsStorage.revenue30d).toBeTruthy();
+  });
 });
 
 async function makePaidRequest(
@@ -420,4 +439,16 @@ async function authHeaders(account: ReturnType<typeof privateKeyToAccount>, meth
     'x-auth-timestamp': String(timestamp),
     'x-auth-signature': signature,
   };
+}
+
+async function waitForUsageSummary(baseUrl: string) {
+  for (let i = 0; i < 10; i += 1) {
+    const response = await fetch(`${baseUrl}/v1/usage`);
+    const json = await response.json();
+    if (json.metering?.windows?.allTime?.paidCalls >= 1) return json;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+
+  const response = await fetch(`${baseUrl}/v1/usage`);
+  return response.json();
 }

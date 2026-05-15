@@ -35,6 +35,7 @@ Vaultline is built around that shape.
 - open storage for shared/public-by-key objects
 - wallet-based private storage for owner-only or allowlisted reads
 - signed, expiring share links for handing files to another agent or human
+- append-only usage metering for API calls, unique callers, paid calls, revenue, and storage deltas
 - encrypted storage planned as a higher-privacy tier *(coming soon)*
 - free small downloads under a configurable threshold
 - paid large downloads
@@ -159,6 +160,12 @@ PRICE_STORAGE_PER_GB_MONTH=0.08
 PRICE_RETRIEVAL_PER_GB=0.015
 PRICE_WRITE_PER_GB=0.03
 FREE_READ_MAX_BYTES=1048576
+
+# Optional. Mount this path as persistent storage in production.
+VAULTLINE_USAGE_LEDGER_PATH=state/vaultline-usage-events.jsonl
+
+# Recommended for production metering.
+NEON_DATABASE_URL=postgresql://...
 ```
 
 ## Verification
@@ -181,7 +188,7 @@ npm run check:prod:full
 - `DELETE /v1/files/{path}` — free delete
 - `HEAD /v1/files/{path}` — free metadata
 - `GET /v1/list/{prefix}` — free listing
-- `GET /v1/usage` — free usage summary
+- `GET /v1/usage` — storage, usage, revenue, user, and endpoint summary
 - `GET /v1/health` — health check
 - `GET /v1/test/paid-ping` — minimal paid route for verification
 
@@ -208,6 +215,7 @@ npm run check:prod:full
 
 - Base mainnet requires the authenticated CDP facilitator; public `x402.org/facilitator` is not enough.
 - R2 TLS works normally in this project on Node 24.15.0; the old global TLS bypass was removed.
+- `/v1/usage` uses Neon/Postgres when `NEON_DATABASE_URL`, `DATABASE_URL`, or `POSTGRES_URL` is set. Without Postgres, it falls back to the append-only JSONL ledger at `VAULTLINE_USAGE_LEDGER_PATH`.
 - If secrets were exposed in chat, rotate them before public launch.
 
 ## Short thesis

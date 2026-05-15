@@ -14,6 +14,7 @@ import { PRICING, X402_CONFIG } from '../config.js';
 import { getResourceServer, X402_MAINNET_NETWORK } from '../cdpFacilitator.js';
 import { parseWalletList, verifyStorageRequestAuth, type AuthenticatedWallet } from '../auth.js';
 import { createShareToken, normalizeExpiresInSeconds, verifyShareToken } from '../share.js';
+import { getUsageStoreInfo, getUsageWindows, setUsageBilling } from '../usage.js';
 
 const router = Router();
 const resourceServer = getResourceServer();
@@ -111,13 +112,28 @@ router.put('/v1/files/*path', enforcePrivateUploadAuth, uploadPaymentMiddleware,
   const data = normalizeBodyToBuffer(req.body);
 
   try {
+    const previous = await getOptionalFileMetadata(filePath);
     const contentType = typeof req.headers['content-type'] === 'string' ? req.headers['content-type'] : undefined;
     const accessPolicy = getRequestedAccessPolicy(req as RouteRequest, filePath);
     const metadata = await uploadFile(filePath, data, contentType, accessPolicy);
+    const cost = calculatePaymentAmount('write', data.length, metadata.tier);
+    const previousSize = previous?.size ?? 0;
+    const storageBytesDelta = metadata.size - previousSize;
+    setUsageBilling(res, {
+      operation: 'write',
+      resourceKey: filePath,
+      tier: metadata.tier,
+      billableAmount: cost,
+      requestBytes: data.length,
+      responseBytes: data.length,
+      storageBytesAdded: Math.max(storageBytesDelta, 0),
+      storageBytesDeleted: Math.max(-storageBytesDelta, 0),
+      storageBytesDelta,
+    });
     res.json({
       ok: true,
       file: metadata,
-      cost: calculatePaymentAmount('write', data.length, metadata.tier).toFixed(6),
+      cost: cost.toFixed(6),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -134,6 +150,13 @@ router.head('/v1/files/*path', authorizePrivateFileAccess, async (req, res) => {
   try {
     const meta = await getFileMetadata(filePath);
     const readCost = calculatePaymentAmount('read', meta.size, meta.tier);
+    setUsageBilling(res, {
+      operation: 'metadata',
+      resourceKey: filePath,
+      tier: meta.tier,
+      responseBytes: 0,
+      billableAmount: 0,
+    });
     res.setHeader('Content-Length', meta.size.toString());
     res.setHeader('Content-Type', meta.contentType ?? 'application/octet-stream');
     res.setHeader('Last-Modified', meta.lastModified.toUTCString());
@@ -157,6 +180,13 @@ router.get('/v1/files/*path', authorizePrivateFileAccess, freeDownloadBypass, do
   try {
     const result = await downloadFile(filePath);
     const cost = calculatePaymentAmount('read', result.metadata.size, result.metadata.tier);
+    setUsageBilling(res, {
+      operation: 'read',
+      resourceKey: filePath,
+      tier: result.metadata.tier,
+      billableAmount: cost,
+      responseBytes: result.data.length,
+    });
     res.setHeader('Content-Type', result.metadata.contentType ?? 'application/octet-stream');
     res.setHeader('X-Storage-Cost', cost.toFixed(6));
     res.send(result.data);
@@ -177,7 +207,16 @@ router.delete('/v1/files/*path', authorizePrivateFileAccess, async (req, res) =>
   }
 
   try {
+    const previous = await getOptionalFileMetadata(filePath);
     await deleteFile(filePath);
+    setUsageBilling(res, {
+      operation: 'delete',
+      resourceKey: filePath,
+      tier: previous?.tier,
+      billableAmount: 0,
+      storageBytesDeleted: previous?.size ?? 0,
+      storageBytesDelta: -(previous?.size ?? 0),
+    });
     res.json({ ok: true, deleted: filePath });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -203,6 +242,12 @@ router.post('/v1/shares', async (req, res) => {
 
     const expiresInSeconds = normalizeExpiresInSeconds((req.body as { expiresInSeconds?: unknown } | undefined)?.expiresInSeconds);
     const share = createShareToken({ key: filePath, expiresInSeconds });
+    setUsageBilling(res, {
+      operation: 'share',
+      resourceKey: filePath,
+      tier: meta.tier,
+      billableAmount: 0,
+    });
     res.json({
       ok: true,
       token: share.token,
@@ -226,6 +271,13 @@ router.get('/v1/shares/:token', async (req, res) => {
     const token = req.params.token;
     const payload = verifyShareToken(token);
     const result = await downloadFile(payload.key);
+    setUsageBilling(res, {
+      operation: 'read',
+      resourceKey: payload.key,
+      tier: result.metadata.tier,
+      billableAmount: 0,
+      responseBytes: result.data.length,
+    });
     res.setHeader('Content-Type', result.metadata.contentType ?? 'application/octet-stream');
     res.setHeader('X-Vaultline-Share-Key', payload.key);
     res.setHeader('X-Vaultline-Share-Expires-At', new Date(payload.exp * 1000).toISOString());
@@ -245,6 +297,10 @@ router.get('/v1/shares/:token', async (req, res) => {
 router.get('/v1/list', async (req, res) => {
   try {
     const result = await filterListForViewer('', req as RouteRequest);
+    setUsageBilling(res, {
+      operation: 'list',
+      billableAmount: 0,
+    });
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -255,6 +311,11 @@ router.get('/v1/list/*prefix', async (req, res) => {
   const prefix = getParamPath(req.params.prefix) ?? '';
   try {
     const result = await filterListForViewer(prefix, req as RouteRequest);
+    setUsageBilling(res, {
+      operation: 'list',
+      resourceKey: prefix,
+      billableAmount: 0,
+    });
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -269,12 +330,22 @@ router.get('/v1/usage', async (_req, res) => {
       (sum, file) => sum + calculatePaymentAmount('storage', file.size, file.tier),
       0
     );
+    const usage = await getUsageWindows();
 
     res.json({
       totalFiles: allFiles.files.length,
       totalBytes,
       totalGB: totalBytes / (1024 * 1024 * 1024),
       estimatedMonthlyCost: monthlyCost.toFixed(4),
+      metering: {
+        ledger: getUsageStoreInfo(),
+        revenueVsStorage: {
+          revenue30d: usage.last30d.revenueUsd.toFixed(6),
+          estimatedMonthlyStorageCost: monthlyCost.toFixed(6),
+          estimatedCoverage30d: (usage.last30d.revenueUsd - monthlyCost).toFixed(6),
+        },
+        windows: usage,
+      },
       pricing: {
         open: {
           storagePerGBMonth: PRICING.open.storage,
@@ -295,6 +366,10 @@ router.get('/v1/usage', async (_req, res) => {
 });
 
 router.get('/v1/health', (_req, res) => {
+  setUsageBilling(res, {
+    operation: 'health',
+    billableAmount: 0,
+  });
   res.json({ status: 'ok', service: 'vaultline', version: '0.1.1' });
 });
 
@@ -368,6 +443,13 @@ async function freeDownloadBypass(req: any, res: any, next: () => void) {
     }
 
     const result = await downloadFile(filePath);
+    setUsageBilling(res, {
+      operation: 'read',
+      resourceKey: filePath,
+      tier: result.metadata.tier,
+      billableAmount: 0,
+      responseBytes: result.data.length,
+    });
     res.setHeader('Content-Type', result.metadata.contentType ?? 'application/octet-stream');
     res.setHeader('X-Storage-Cost', '0.000000');
     res.send(result.data);
@@ -464,6 +546,15 @@ async function getOptionalAuth(req: RouteRequest, path: string) {
     signature: getHeader(req.headers, 'x-auth-signature'),
     timestamp: getHeader(req.headers, 'x-auth-timestamp'),
   });
+}
+
+async function getOptionalFileMetadata(filePath: string) {
+  try {
+    return await getFileMetadata(filePath);
+  } catch (err: any) {
+    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) return undefined;
+    throw err;
+  }
 }
 
 function normalizeBodyToBuffer(rawBody: unknown): Buffer {

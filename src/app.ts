@@ -4,6 +4,7 @@ import { paymentMiddleware as paymentMiddlewareV2 } from '@x402/express';
 import filesRouter from './routes/files.js';
 import { SERVER_CONFIG, X402_CONFIG } from './config.js';
 import { getResourceServer, X402_MAINNET_NETWORK } from './cdpFacilitator.js';
+import { setUsageBilling, usageMeteringMiddleware } from './usage.js';
 
 export function createApp() {
   const app = express();
@@ -18,6 +19,7 @@ export function createApp() {
   );
   app.use(express.json({ limit: SERVER_CONFIG.bodyLimit }));
   app.use('/v1/files', express.raw({ type: () => true, limit: SERVER_CONFIG.bodyLimit }));
+  app.use(usageMeteringMiddleware);
 
   app.use((req, _res, next) => {
     const paymentHeader = req.headers['x-payment'] || req.headers['payment-signature'];
@@ -55,6 +57,10 @@ export function createApp() {
   }
 
   app.get('/v1/test/paid-ping', (_req, res) => {
+    setUsageBilling(res, {
+      operation: 'test',
+      billableAmount: 0.001,
+    });
     res.json({ ok: true, paid: true, service: 'vaultline', ts: new Date().toISOString() });
   });
 
