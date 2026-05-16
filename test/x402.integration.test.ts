@@ -164,6 +164,7 @@ describe('x402 integration', () => {
     process.env.X402_USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
     process.env.FREE_READ_MAX_BYTES = '1048576';
     process.env.VAULTLINE_USAGE_LEDGER_PATH = usageLedgerPath;
+    process.env.BANKR_PROXY_TOKEN = 'test-bankr-proxy-token';
 
     await resourceServer.initialize();
     const { createApp } = await import('../src/app.ts');
@@ -396,6 +397,45 @@ describe('x402 integration', () => {
     expect(usage.metering.windows.allTime.uniqueUsers).toBeGreaterThanOrEqual(1);
     expect(usage.metering.windows.allTime.byEndpoint.some((item: any) => item.endpoint === 'PUT /v1/files/*')).toBe(true);
     expect(usage.metering.revenueVsStorage.revenue30d).toBeTruthy();
+  });
+
+  it('accepts Bankr-proxied paid uploads without requiring a second x402 payment', async () => {
+    const body = Buffer.from('paid by bankr');
+    const response = await fetch(`${baseUrl}/v1/files/bankr.txt`, {
+      method: 'PUT',
+      headers: {
+        'content-type': 'text/plain',
+        'x-vaultline-bankr-proxy-token': 'test-bankr-proxy-token',
+        'x-vaultline-payment-provider': 'bankr',
+        'x-bankr-service': 'vaultline-upload',
+        'x-bankr-settle-amount': '0.002000',
+      },
+      body,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      ok: true,
+      file: { key: 'bankr.txt', size: body.length, contentType: 'text/plain', tier: 'open' },
+      cost: '0.002000',
+    });
+
+    const usage = await waitForUsageSummary(baseUrl);
+    expect(usage.metering.windows.allTime.paidCalls).toBeGreaterThanOrEqual(1);
+    expect(usage.metering.windows.allTime.revenueUsd).toBeGreaterThanOrEqual(0.002);
+  });
+
+  it('rejects invalid Bankr proxy tokens before bypassing native x402', async () => {
+    const response = await fetch(`${baseUrl}/v1/files/bad-bankr.txt`, {
+      method: 'PUT',
+      headers: {
+        'content-type': 'text/plain',
+        'x-vaultline-bankr-proxy-token': 'wrong-token',
+      },
+      body: 'should fail',
+    });
+
+    expect(response.status).toBe(401);
   });
 });
 

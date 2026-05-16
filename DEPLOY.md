@@ -36,6 +36,12 @@ Railway is still the easiest first deploy for this service:
 - `PRICE_WRITE_PER_GB`
 - `FREE_READ_MAX_BYTES`
 
+## Treasury rule
+
+- Set `X402_TREASURY_WALLET` explicitly in the deployed environment.
+- Keep the treasury private key outside the repo and outside markdown notes.
+- Treat `X402_TEST_PAYTO` as test-only for `/v1/test/paid-ping`; file routes should always pay the treasury wallet.
+
 ## Production blockers
 
 ### 1) Rotate exposed secrets

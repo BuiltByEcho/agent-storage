@@ -1,0 +1,101 @@
+{
+  "network": "base",
+  "currency": "USDC",
+  "requiredEnvVars": ["VAULTLINE_BANKR_PROXY_TOKEN"],
+  "services": {
+    "vaultline-upload": {
+      "price": "0.002",
+      "currency": "USDC",
+      "network": "base",
+      "methods": ["POST"],
+      "paymentScheme": "exact",
+      "description": "Upload an object up to 5 MB to Vaultline storage through Bankr x402. Fixed public minimum price covers Bankr/payment overhead.",
+      "category": "infrastructure",
+      "tags": ["vaultline", "storage", "files", "agents", "bankr", "x402"],
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "description": "Vaultline object path, e.g. workspace/demo.txt." },
+            "content": { "type": "string", "description": "File content as UTF-8 text or base64." },
+            "encoding": { "type": "string", "description": "Content encoding.", "enum": ["text", "base64"] },
+            "contentType": { "type": "string", "description": "Optional MIME type." }
+          },
+          "required": ["path", "content"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "ok": { "type": "boolean" },
+            "file": { "type": "object" },
+            "price": { "type": "string" },
+            "bankr": { "type": "object" }
+          }
+        }
+      }
+    },
+    "vaultline-download": {
+      "price": "0.002",
+      "currency": "USDC",
+      "network": "base",
+      "methods": ["POST"],
+      "paymentScheme": "exact",
+      "description": "Download an object up to 5 MB from Vaultline storage through Bankr x402. Returns text when requested or base64 for binary-safe agent handoff.",
+      "category": "infrastructure",
+      "tags": ["vaultline", "storage", "download", "files", "agents", "bankr", "x402"],
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "description": "Vaultline object path to download." },
+            "asText": { "type": "boolean", "description": "Return UTF-8 text instead of base64 when true." },
+            "maxBytes": { "type": "integer", "description": "Optional safety cap. Defaults to 5 MB." }
+          },
+          "required": ["path"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "ok": { "type": "boolean" },
+            "path": { "type": "string" },
+            "content": { "type": "string" },
+            "encoding": { "type": "string" },
+            "contentType": { "type": "string" },
+            "size": { "type": "integer" },
+            "price": { "type": "string" },
+            "bankr": { "type": "object" }
+          }
+        }
+      }
+    },
+    "vaultline-list": {
+      "price": "0.002",
+      "currency": "USDC",
+      "network": "base",
+      "methods": ["POST"],
+      "paymentScheme": "exact",
+      "description": "List open Vaultline objects by prefix through Bankr x402.",
+      "category": "infrastructure",
+      "tags": ["vaultline", "storage", "list", "files", "agents", "bankr", "x402"],
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "prefix": { "type": "string", "description": "Optional object key prefix." }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "ok": { "type": "boolean" },
+            "files": { "type": "array" },
+            "directories": { "type": "array" },
+            "prefix": { "type": "string" },
+            "price": { "type": "string" },
+            "bankr": { "type": "object" }
+          }
+        }
+      }
+    }
+  }
+}

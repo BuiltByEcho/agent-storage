@@ -1,12 +1,9 @@
 import 'dotenv/config';
 
-function envOrDefault(name: string, fallback: string): string {
+function envRequired(name: string): string {
   const value = process.env[name];
   if (value) return value;
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(`Missing required production env var: ${name}`);
-  }
-  return fallback;
+  throw new Error(`Missing required env var: ${name}`);
 }
 
 function parseBytes(value: string | undefined, fallback: string): string {
@@ -30,10 +27,14 @@ export const PRICING = {
 export const X402_CONFIG = {
   network: process.env.X402_NETWORK ?? 'base',
   usdcContract: process.env.X402_USDC_CONTRACT ?? '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-  treasuryWallet: envOrDefault('X402_TREASURY_WALLET', '0x13843882c89444bd2ba55ea9ade90c5b26b92d90'),
+  treasuryWallet: envRequired('X402_TREASURY_WALLET'),
   facilitatorUrl: process.env.X402_FACILITATOR_URL ?? 'https://x402.org/facilitator',
   cdpApiKeyId: process.env.CDP_API_KEY_ID ?? process.env.CDP_KEY_NAME ?? '',
   cdpApiKeySecret: process.env.CDP_API_KEY_SECRET ?? process.env.CDP_KEY_SECRET ?? '',
+} as const;
+
+export const BANKR_CONFIG = {
+  proxyToken: process.env.BANKR_PROXY_TOKEN ?? '',
 } as const;
 
 export const R2_CONFIG = {

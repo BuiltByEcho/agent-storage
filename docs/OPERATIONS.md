@@ -19,6 +19,7 @@ X402_TREASURY_WALLET=
 X402_FACILITATOR_URL=https://api.cdp.coinbase.com/platform/v2/x402
 CDP_API_KEY_ID=
 CDP_API_KEY_SECRET=
+BANKR_PROXY_TOKEN=
 
 PRICE_STORAGE_PER_GB_MONTH=0.08
 PRICE_RETRIEVAL_PER_GB=0.015
@@ -28,6 +29,36 @@ PRICE_PRIVATE_RETRIEVAL_PER_GB=0.02
 PRICE_PRIVATE_WRITE_PER_GB=0.045
 FREE_READ_MAX_BYTES=1048576
 ```
+
+## Bankr x402 primary endpoints
+
+Primary public endpoints are deployed through Bankr x402 Cloud under the `echo-token@agentmail.to` Bankr account:
+
+- `vaultline-upload`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-upload`
+- `vaultline-download`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-download`
+- `vaultline-list`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-list`
+
+The live Vaultline backend must have `BANKR_PROXY_TOKEN` set. Bankr must have the same value set as an encrypted x402 env var:
+
+```bash
+bankr x402 env set VAULTLINE_BANKR_PROXY_TOKEN=...
+```
+
+The Bankr handlers call the backend with `x-vaultline-bankr-proxy-token` after Bankr has collected payment. Backend direct x402 remains available as a fallback and for lower-level clients.
+
+Current Bankr public price:
+- upload: `$0.002 USDC`
+- download: `$0.002 USDC`
+- list: `$0.002 USDC`
+
+Note: Bankr `upto` settlement was tested, but Bankr revenue recorded the full configured cap. Production endpoints are fixed-price for now to avoid overcharging agents.
+
+## Treasury wallet policy
+
+- `X402_TREASURY_WALLET` is the canonical revenue collection address for all paid file routes.
+- Store the treasury private key outside the repo in a machine-local secret file or secret manager.
+- Do not store treasury secrets in markdown docs, chat, or committed `.env` files.
+- `X402_TEST_PAYTO` is allowed only for `GET /v1/test/paid-ping` and must not change file-route payouts.
 
 ## Build and run
 

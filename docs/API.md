@@ -3,10 +3,18 @@
 Base URL examples:
 - local: `http://localhost:3001`
 - deployed: `https://your-service.example.com`
+- primary Bankr x402 Cloud: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90`
 
 ## Payment model
 
-Vaultline uses x402 v2 on Base mainnet for paid routes.
+Vaultline's primary public payment surface is Bankr x402 Cloud. The direct Vaultline API also uses x402 v2 on Base mainnet and remains available as a fallback/lower-level route.
+
+Primary Bankr endpoints:
+- `POST /vaultline-upload` — fixed `$0.002 USDC`, uploads up to 5 MB from JSON `{ path, content, encoding, contentType }`
+- `POST /vaultline-download` — fixed `$0.002 USDC`, downloads up to 5 MB from JSON `{ path, asText, maxBytes }`
+- `POST /vaultline-list` — fixed `$0.002 USDC`, lists open objects from JSON `{ prefix }`
+
+Direct API payment flow:
 
 When a request requires payment:
 1. client sends request normally

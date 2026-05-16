@@ -7,12 +7,20 @@ import { normalizeWallet } from './auth.js';
 
 type StorageTier = 'open' | 'private';
 type PaymentStatus = 'none' | 'required' | 'paid' | 'failed';
+type PaymentProvider = 'x402' | 'bankr';
 
 export type UsageBillingContext = {
   operation?: 'write' | 'read' | 'delete' | 'metadata' | 'list' | 'share' | 'health' | 'test';
   resourceKey?: string;
   tier?: StorageTier;
   billableAmount?: number;
+  revenueUsd?: number;
+  paymentProvider?: PaymentProvider;
+  payer?: string;
+  paymentNetwork?: string;
+  paymentTransaction?: string;
+  paymentReceipt?: string;
+  paymentService?: string;
   storageBytesAdded?: number;
   storageBytesDeleted?: number;
   storageBytesDelta?: number;
@@ -36,9 +44,12 @@ export type UsageEvent = {
   paymentHeaderHash?: string;
   paymentResponseHash?: string;
   paymentStatus: PaymentStatus;
+  paymentProvider?: PaymentProvider;
   payer?: string;
   paymentNetwork?: string;
   paymentTransaction?: string;
+  paymentReceipt?: string;
+  paymentService?: string;
   operation?: UsageBillingContext['operation'];
   resourceKey?: string;
   tier?: StorageTier;
@@ -284,9 +295,13 @@ function buildUsageEvent(req: Request, res: Response, context: UsageBillingConte
   const apiKey = getHeader(req, 'x-api-key') ?? getHeader(req, 'authorization');
   const paymentHeaderHash = paymentHeader ? hashValue(paymentHeader) : undefined;
   const paymentResponseHash = paymentResponseHeader ? hashValue(paymentResponseHeader) : undefined;
-  const identity = getIdentity({ authWallet, apiKey, paymentHeaderHash, payer: paymentResponse.payer });
+  const paymentProvider = context.paymentProvider ?? (getHeader(req, 'x-vaultline-payment-provider') === 'bankr' ? 'bankr' : undefined);
+  const bankrPayer = normalizeWallet(context.payer ?? getHeader(req, 'x-bankr-payer'));
+  const payer = paymentResponse.payer ?? bankrPayer;
+  const identity = getIdentity({ authWallet, apiKey, paymentHeaderHash, payer });
   const billableAmount = toMoney(context.billableAmount ?? 0);
-  const settled = res.statusCode < 400 && Boolean(paymentHeader) && billableAmount > 0;
+  const revenueUsd = toMoney(context.revenueUsd ?? billableAmount);
+  const settled = res.statusCode < 400 && billableAmount > 0 && (Boolean(paymentHeader) || paymentProvider === 'bankr');
 
   return {
     eventId: randomUUID(),
@@ -303,9 +318,12 @@ function buildUsageEvent(req: Request, res: Response, context: UsageBillingConte
     paymentHeaderHash,
     paymentResponseHash,
     paymentStatus: settled ? 'paid' : billableAmount > 0 && res.statusCode === 402 ? 'required' : res.statusCode >= 400 && paymentHeader ? 'failed' : 'none',
-    payer: paymentResponse.payer,
-    paymentNetwork: paymentResponse.network,
-    paymentTransaction: paymentResponse.transaction,
+    paymentProvider,
+    payer,
+    paymentNetwork: context.paymentNetwork ?? paymentResponse.network,
+    paymentTransaction: context.paymentTransaction ?? paymentResponse.transaction,
+    paymentReceipt: context.paymentReceipt ?? getHeader(req, 'x-bankr-receipt'),
+    paymentService: context.paymentService ?? getHeader(req, 'x-bankr-service'),
     operation: context.operation,
     resourceKey: context.resourceKey,
     tier: context.tier,
@@ -316,7 +334,7 @@ function buildUsageEvent(req: Request, res: Response, context: UsageBillingConte
     storageBytesDelta: context.storageBytesDelta ?? 0,
     storageBytesTotalAfter: context.storageBytesTotalAfter,
     billableAmount,
-    revenueUsd: settled ? billableAmount : 0,
+    revenueUsd: settled ? revenueUsd : 0,
     userAgent: getHeader(req, 'user-agent'),
     ipHash: req.ip ? hashValue(req.ip) : undefined,
   };

@@ -58,7 +58,12 @@ That opens up patterns like:
 
 ## Current state
 
-Verified in production at `https://storage.builtbyecho.xyz`:
+Verified in production:
+- primary Bankr x402 endpoints:
+  - `vaultline-upload`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-upload`
+  - `vaultline-download`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-download`
+  - `vaultline-list`: `https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-list`
+- direct/fallback API at `https://storage.builtbyecho.xyz`
 - x402 v2 flow on Base mainnet
 - paid ping route
 - paid uploads
@@ -70,6 +75,10 @@ Verified in production at `https://storage.builtbyecho.xyz`:
 - paid upload, free read, private wallet-gated read, and paid large read against the live endpoint
 
 ## Pricing
+
+Primary Bankr endpoints use a fixed public minimum of `$0.002 USDC/request` for upload, download, and list. Upload/download payloads are currently capped at 5 MB on the Bankr endpoint surface.
+
+The direct Vaultline API remains available as a lower-level fallback with dynamic size/tier pricing:
 
 Current default pricing:
 
@@ -166,6 +175,9 @@ VAULTLINE_USAGE_LEDGER_PATH=state/vaultline-usage-events.jsonl
 
 # Recommended for production metering.
 NEON_DATABASE_URL=postgresql://...
+
+# Required only for Bankr x402 Cloud proxying into the backend.
+BANKR_PROXY_TOKEN=...
 ```
 
 ## Verification
@@ -180,6 +192,14 @@ npm run check:prod:full
 ```
 
 ## Core routes
+
+Primary Bankr routes:
+
+- `POST https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-upload` — paid upload, JSON body `{ path, content, encoding, contentType }`
+- `POST https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-download` — paid download, JSON body `{ path, asText, maxBytes }`
+- `POST https://x402.bankr.bot/0x13843882c89444bd2ba55ea9ade90c5b26b92d90/vaultline-list` — paid listing, JSON body `{ prefix }`
+
+Direct/fallback API routes:
 
 - `PUT /v1/files/{path}` — paid upload
 - `GET /v1/files/{path}` — free for small files, paid for larger reads

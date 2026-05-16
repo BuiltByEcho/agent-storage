@@ -23,7 +23,9 @@ Never commit or share production secrets, including:
 - wallet private keys / mnemonics
 - deployment `.env` files
 
-Production deployments must provide `X402_TREASURY_WALLET`; the development fallback is only for local/test convenience.
+Production and local runtime must provide `X402_TREASURY_WALLET`. Do not hardcode treasury addresses in source.
+
+`X402_TEST_PAYTO` is test-only for `/v1/test/paid-ping`. It must never control production file-route payouts.
 
 ## Reporting vulnerabilities
 

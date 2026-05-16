@@ -33,8 +33,8 @@ export function createApp() {
     next();
   });
 
-  const testPayTo = (process.env.X402_TEST_PAYTO || X402_CONFIG.treasuryWallet) as `0x${string}` | '';
-  if (testPayTo) {
+  const paidPingPayTo = (process.env.X402_TEST_PAYTO || X402_CONFIG.treasuryWallet) as `0x${string}` | '';
+  if (paidPingPayTo) {
     const resourceServer = getResourceServer();
 
     app.use(
@@ -45,7 +45,7 @@ export function createApp() {
               scheme: 'exact',
               price: '$0.001',
               network: X402_MAINNET_NETWORK,
-              payTo: testPayTo,
+              payTo: paidPingPayTo,
             },
             description: 'Vaultline paid ping test',
             mimeType: 'application/json',

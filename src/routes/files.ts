@@ -10,7 +10,7 @@ import {
   type FileMetadata,
 } from '../services/storage.js';
 import { calculatePaymentAmount } from '../pricing.js';
-import { PRICING, X402_CONFIG } from '../config.js';
+import { BANKR_CONFIG, PRICING, X402_CONFIG } from '../config.js';
 import { getResourceServer, X402_MAINNET_NETWORK } from '../cdpFacilitator.js';
 import { parseWalletList, verifyStorageRequestAuth, type AuthenticatedWallet } from '../auth.js';
 import { createShareToken, normalizeExpiresInSeconds, verifyShareToken } from '../share.js';
@@ -18,7 +18,7 @@ import { getUsageStoreInfo, getUsageWindows, setUsageBilling } from '../usage.js
 
 const router = Router();
 const resourceServer = getResourceServer();
-const testPayTo = (process.env.X402_TEST_PAYTO || X402_CONFIG.treasuryWallet) as `0x${string}` | '';
+const treasuryPayTo = X402_CONFIG.treasuryWallet as `0x${string}`;
 
 type RouteRequest = {
   method: string;
@@ -27,7 +27,7 @@ type RouteRequest = {
   authWallet?: AuthenticatedWallet;
 };
 
-const uploadPaymentMiddleware = testPayTo
+const uploadPaymentMiddleware = treasuryPayTo
   ? paymentMiddleware(
       {
         'PUT /v1/files/*': {
@@ -36,7 +36,7 @@ const uploadPaymentMiddleware = testPayTo
             price: async ({ adapter }) =>
               formatUsd(calculatePaymentAmount('write', getRequestSizeBytes(adapter), getRequestedStorageTierFromAdapter(adapter))),
             network: X402_MAINNET_NETWORK,
-            payTo: testPayTo,
+            payTo: treasuryPayTo,
           },
           description: 'Upload a file to Vaultline',
           mimeType: 'application/json',
@@ -53,7 +53,7 @@ const uploadPaymentMiddleware = testPayTo
                 amount: amount.toFixed(6),
                 currency: 'USDC',
                 network: X402_MAINNET_NETWORK,
-                payTo: testPayTo,
+                payTo: treasuryPayTo,
                 sizeBytes,
                 tier,
                 description: `Upload ${path} (${formatBytes(sizeBytes)})`,
@@ -66,7 +66,7 @@ const uploadPaymentMiddleware = testPayTo
     )
   : (_req: any, _res: any, next: () => void) => next();
 
-const downloadPaymentMiddleware = testPayTo
+const downloadPaymentMiddleware = treasuryPayTo
   ? paymentMiddleware(
       {
         'GET /v1/files/*': {
@@ -74,7 +74,7 @@ const downloadPaymentMiddleware = testPayTo
             scheme: 'exact',
             price: async ({ path }) => formatUsd(await getDownloadCostFromPath(path)),
             network: X402_MAINNET_NETWORK,
-            payTo: testPayTo,
+            payTo: treasuryPayTo,
           },
           description: 'Download a file from Vaultline',
           mimeType: 'application/octet-stream',
@@ -90,7 +90,7 @@ const downloadPaymentMiddleware = testPayTo
                 amount: amount.toFixed(6),
                 currency: 'USDC',
                 network: X402_MAINNET_NETWORK,
-                payTo: testPayTo,
+                payTo: treasuryPayTo,
                 sizeBytes: size,
                 description: `Download ${key} (${formatBytes(size)})`,
               },
@@ -102,7 +102,7 @@ const downloadPaymentMiddleware = testPayTo
     )
   : (_req: any, _res: any, next: () => void) => next();
 
-router.put('/v1/files/*path', enforcePrivateUploadAuth, uploadPaymentMiddleware, async (req, res) => {
+router.put('/v1/files/*path', enforcePrivateUploadAuth, bankrProxyPaymentBypass, directX402Payment(uploadPaymentMiddleware), async (req, res) => {
   const filePath = getParamPath(req.params.path);
   if (!filePath) {
     res.status(400).json({ error: 'File path required' });
@@ -116,7 +116,7 @@ router.put('/v1/files/*path', enforcePrivateUploadAuth, uploadPaymentMiddleware,
     const contentType = typeof req.headers['content-type'] === 'string' ? req.headers['content-type'] : undefined;
     const accessPolicy = getRequestedAccessPolicy(req as RouteRequest, filePath);
     const metadata = await uploadFile(filePath, data, contentType, accessPolicy);
-    const cost = calculatePaymentAmount('write', data.length, metadata.tier);
+    const cost = getBankrSettledAmount(req as RouteRequest) ?? calculatePaymentAmount('write', data.length, metadata.tier);
     const previousSize = previous?.size ?? 0;
     const storageBytesDelta = metadata.size - previousSize;
     setUsageBilling(res, {
@@ -124,6 +124,7 @@ router.put('/v1/files/*path', enforcePrivateUploadAuth, uploadPaymentMiddleware,
       resourceKey: filePath,
       tier: metadata.tier,
       billableAmount: cost,
+      ...getBankrUsageContext(req as RouteRequest),
       requestBytes: data.length,
       responseBytes: data.length,
       storageBytesAdded: Math.max(storageBytesDelta, 0),
@@ -170,7 +171,7 @@ router.head('/v1/files/*path', authorizePrivateFileAccess, async (req, res) => {
   }
 });
 
-router.get('/v1/files/*path', authorizePrivateFileAccess, freeDownloadBypass, downloadPaymentMiddleware, async (req, res) => {
+router.get('/v1/files/*path', authorizePrivateFileAccess, bankrProxyPaymentBypass, freeDownloadBypass, directX402Payment(downloadPaymentMiddleware), async (req, res) => {
   const filePath = getParamPath(req.params.path);
   if (!filePath) {
     res.status(400).json({ error: 'File path required' });
@@ -179,19 +180,20 @@ router.get('/v1/files/*path', authorizePrivateFileAccess, freeDownloadBypass, do
 
   try {
     const result = await downloadFile(filePath);
-    const cost = calculatePaymentAmount('read', result.metadata.size, result.metadata.tier);
+    const cost = getBankrSettledAmount(req as RouteRequest) ?? calculatePaymentAmount('read', result.metadata.size, result.metadata.tier);
     setUsageBilling(res, {
       operation: 'read',
       resourceKey: filePath,
       tier: result.metadata.tier,
       billableAmount: cost,
+      ...getBankrUsageContext(req as RouteRequest),
       responseBytes: result.data.length,
     });
     res.setHeader('Content-Type', result.metadata.contentType ?? 'application/octet-stream');
     res.setHeader('X-Storage-Cost', cost.toFixed(6));
     res.send(result.data);
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+    if (isStorageNotFoundError(err)) {
       res.status(404).json({ error: 'File not found' });
     } else {
       res.status(500).json({ error: err.message });
@@ -199,7 +201,7 @@ router.get('/v1/files/*path', authorizePrivateFileAccess, freeDownloadBypass, do
   }
 });
 
-router.delete('/v1/files/*path', authorizePrivateFileAccess, async (req, res) => {
+router.delete('/v1/files/*path', authorizePrivateFileAccess, bankrProxyPaymentBypass, async (req, res) => {
   const filePath = getParamPath(req.params.path);
   if (!filePath) {
     res.status(400).json({ error: 'File path required' });
@@ -213,7 +215,8 @@ router.delete('/v1/files/*path', authorizePrivateFileAccess, async (req, res) =>
       operation: 'delete',
       resourceKey: filePath,
       tier: previous?.tier,
-      billableAmount: 0,
+      billableAmount: getBankrSettledAmount(req as RouteRequest) ?? 0,
+      ...getBankrUsageContext(req as RouteRequest),
       storageBytesDeleted: previous?.size ?? 0,
       storageBytesDelta: -(previous?.size ?? 0),
     });
@@ -257,7 +260,7 @@ router.post('/v1/shares', async (req, res) => {
       expiresInSeconds: share.expiresInSeconds,
     });
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+    if (isStorageNotFoundError(err)) {
       res.status(404).json({ error: 'File not found' });
       return;
     }
@@ -285,7 +288,7 @@ router.get('/v1/shares/:token', async (req, res) => {
     res.setHeader('X-Storage-Cost', '0.000000');
     res.send(result.data);
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+    if (isStorageNotFoundError(err)) {
       res.status(404).json({ error: 'File not found' });
       return;
     }
@@ -294,12 +297,13 @@ router.get('/v1/shares/:token', async (req, res) => {
   }
 });
 
-router.get('/v1/list', async (req, res) => {
+router.get('/v1/list', bankrProxyPaymentBypass, async (req, res) => {
   try {
     const result = await filterListForViewer('', req as RouteRequest);
     setUsageBilling(res, {
       operation: 'list',
-      billableAmount: 0,
+      billableAmount: getBankrSettledAmount(req as RouteRequest) ?? 0,
+      ...getBankrUsageContext(req as RouteRequest),
     });
     res.json(result);
   } catch (err: any) {
@@ -307,14 +311,15 @@ router.get('/v1/list', async (req, res) => {
   }
 });
 
-router.get('/v1/list/*prefix', async (req, res) => {
+router.get('/v1/list/*prefix', bankrProxyPaymentBypass, async (req, res) => {
   const prefix = getParamPath(req.params.prefix) ?? '';
   try {
     const result = await filterListForViewer(prefix, req as RouteRequest);
     setUsageBilling(res, {
       operation: 'list',
       resourceKey: prefix,
-      billableAmount: 0,
+      billableAmount: getBankrSettledAmount(req as RouteRequest) ?? 0,
+      ...getBankrUsageContext(req as RouteRequest),
     });
     res.json(result);
   } catch (err: any) {
@@ -417,7 +422,7 @@ async function authorizePrivateFileAccess(req: any, res: any, next: () => void) 
 
     next();
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+    if (isStorageNotFoundError(err)) {
       res.status(404).json({ error: 'File not found' });
       return;
     }
@@ -454,12 +459,62 @@ async function freeDownloadBypass(req: any, res: any, next: () => void) {
     res.setHeader('X-Storage-Cost', '0.000000');
     res.send(result.data);
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) {
+    if (isStorageNotFoundError(err)) {
       res.status(404).json({ error: 'File not found' });
     } else {
       res.status(500).json({ error: err.message });
     }
   }
+}
+
+function bankrProxyPaymentBypass(req: any, res: any, next: () => void) {
+  const token = getHeader(req.headers, 'x-vaultline-bankr-proxy-token');
+  if (!token) {
+    next();
+    return;
+  }
+
+  if (!BANKR_CONFIG.proxyToken || token !== BANKR_CONFIG.proxyToken) {
+    res.status(401).json({ error: 'Invalid Bankr proxy token' });
+    return;
+  }
+
+  req.bankrProxy = true;
+  next();
+}
+
+function directX402Payment(middleware: (req: any, res: any, next: () => void) => void) {
+  return (req: any, res: any, next: () => void) => {
+    if (isBankrProxy(req)) {
+      next();
+      return;
+    }
+
+    middleware(req, res, next);
+  };
+}
+
+function getBankrSettledAmount(req: RouteRequest) {
+  if (!isBankrProxy(req)) return undefined;
+  const amount = Number.parseFloat(getHeader(req.headers, 'x-bankr-settle-amount') ?? '');
+  if (!Number.isFinite(amount) || amount <= 0) return undefined;
+  return Number(amount.toFixed(6));
+}
+
+function getBankrUsageContext(req: RouteRequest) {
+  if (!isBankrProxy(req)) return {};
+  return {
+    paymentProvider: 'bankr' as const,
+    payer: getHeader(req.headers, 'x-bankr-payer'),
+    paymentNetwork: getHeader(req.headers, 'x-bankr-network') ?? 'base',
+    paymentTransaction: getHeader(req.headers, 'x-bankr-transaction'),
+    paymentReceipt: getHeader(req.headers, 'x-bankr-receipt'),
+    paymentService: getHeader(req.headers, 'x-bankr-service'),
+  };
+}
+
+function isBankrProxy(req: RouteRequest) {
+  return (req as RouteRequest & { bankrProxy?: boolean }).bankrProxy === true;
 }
 
 function getRequestedAccessPolicy(req: RouteRequest, filePath: string): AccessPolicy {
@@ -552,9 +607,20 @@ async function getOptionalFileMetadata(filePath: string) {
   try {
     return await getFileMetadata(filePath);
   } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.message?.includes('not found')) return undefined;
+    if (isStorageNotFoundError(err)) return undefined;
     throw err;
   }
+}
+
+function isStorageNotFoundError(err: any) {
+  return (
+    err?.name === 'NoSuchKey' ||
+    err?.name === 'NotFound' ||
+    err?.$metadata?.httpStatusCode === 404 ||
+    err?.Code === 'NoSuchKey' ||
+    err?.code === 'NoSuchKey' ||
+    String(err?.message || '').toLowerCase().includes('not found')
+  );
 }
 
 function normalizeBodyToBuffer(rawBody: unknown): Buffer {
