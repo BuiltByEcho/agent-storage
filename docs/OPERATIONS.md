@@ -32,11 +32,11 @@ FREE_READ_MAX_BYTES=1048576
 
 ## Bankr x402 primary endpoints
 
-Primary public endpoints are deployed through Bankr x402 Cloud under the `echointheopen@gmail.com` Bankr account:
+Primary public endpoints are deployed through Bankr x402 Cloud under the `builtbyecho@agentmail.to` Bankr account:
 
-- `vaultline-upload`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-upload`
-- `vaultline-download`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-download`
-- `vaultline-list`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-list`
+- `vaultline-upload`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-upload`
+- `vaultline-download`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-download`
+- `vaultline-list`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-list`
 
 The live Vaultline backend must have `BANKR_PROXY_TOKEN` set. Bankr must have the same value set as an encrypted x402 env var:
 

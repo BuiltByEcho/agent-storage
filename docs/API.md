@@ -3,7 +3,7 @@
 Base URL examples:
 - local: `http://localhost:3001`
 - deployed: `https://your-service.example.com`
-- primary Bankr x402 Cloud: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60`
+- primary Bankr x402 Cloud: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae`
 
 ## Payment model
 

@@ -60,9 +60,9 @@ That opens up patterns like:
 
 Verified in production:
 - primary Bankr x402 endpoints:
-  - `vaultline-upload`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-upload`
-  - `vaultline-download`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-download`
-  - `vaultline-list`: `https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-list`
+  - `vaultline-upload`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-upload`
+  - `vaultline-download`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-download`
+  - `vaultline-list`: `https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-list`
 - direct/fallback API at `https://storage.builtbyecho.xyz`
 - x402 v2 flow on Base mainnet
 - paid ping route
@@ -195,9 +195,9 @@ npm run check:prod:full
 
 Primary Bankr routes:
 
-- `POST https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-upload` — paid upload, JSON body `{ path, content, encoding, contentType }`
-- `POST https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-download` — paid download, JSON body `{ path, asText, maxBytes }`
-- `POST https://x402.bankr.bot/0xb5fec83d03e0b1a6ad60293daa7448d5f0ba1f60/vaultline-list` — paid listing, JSON body `{ prefix }`
+- `POST https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-upload` — paid upload, JSON body `{ path, content, encoding, contentType }`
+- `POST https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-download` — paid download, JSON body `{ path, asText, maxBytes }`
+- `POST https://x402.bankr.bot/0x2a16625fad3b0d840ac02c7c59edea3781e340ae/vaultline-list` — paid listing, JSON body `{ prefix }`
 
 Direct/fallback API routes:
 
