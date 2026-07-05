@@ -10,6 +10,20 @@ This SDK removes the biggest friction points for developers:
 - typed failures you can safely catch in agents and CLIs
 - default request timeouts so long-running agent workflows do not hang forever
 
+## Fits in the Echo agent toolchain
+
+Use `@builtbyecho/agent-storage-sdk` when an agent needs to store files, handoffs, generated artifacts, or private workspace data behind wallet-aware access rules. It is the storage primitive that can sit underneath public build logs, private agent memory, and x402-native workflows.
+
+This is the file/storage layer for Echo builds: agents can upload, read back, catch typed failures, and avoid hanging forever on network calls.
+
+## Refresh smoke
+
+```bash
+npm test
+npm run smoke
+npm pack --dry-run --json
+```
+
 ## Current status
 
 Live tiers supported by the SDK:

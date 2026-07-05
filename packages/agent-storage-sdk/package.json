@@ -28,7 +28,10 @@
     "base",
     "usdc",
     "agents",
-    "storage"
+    "storage",
+    "builtbyecho",
+    "agent-tooling",
+    "developer-tools"
   ],
   "author": "BuiltByEcho",
   "license": "MIT",
